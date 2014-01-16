@@ -21,6 +21,15 @@ int get_random_number(int n){
 // Return a (dynamically allocated) array of length size,
 // filled with random numbers between 0 and n
 int* create_random_array(int size, int n){
+	// dynamically allocate enough memory
+	// (the dynamically allocated array should hold
+	// "size" numbers between 0 and n, where n is an integer
+	int* array = malloc(size * sizeof(int));
+
+	// iterate through the empty array and populate it
+	for (int i = 0; i < size; i++) {
+		array[i] = get_random_number(n);
+	}
 }
 
 
