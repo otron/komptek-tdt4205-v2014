@@ -30,11 +30,14 @@ int* create_random_array(int size, int n){
 	for (int i = 0; i < size; i++) {
 		array[i] = get_random_number(n);
 	}
+	return array;
 }
 
 
-// Should print the contents of array of lenght size
+// Should print the contents of array of length size
 void print_array(int* array, int size){
+	
+
 }
 
 
