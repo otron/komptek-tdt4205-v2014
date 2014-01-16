@@ -36,8 +36,10 @@ int* create_random_array(int size, int n){
 
 // Should print the contents of array of length size
 void print_array(int* array, int size){
-	
-
+	for (int i = 0; i < size; i++) {
+		printf("%i ", array[i]);
+	}
+	printf("\n");
 }
 
 
