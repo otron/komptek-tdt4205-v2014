@@ -114,14 +114,19 @@ int search(Node* root, int n){
 // Returns a dynamically allocated node, with all fields set to NULL/0
 Node* create_blank_node(){
 	Node* blank = (Node*)malloc(sizeof(Node));
-	blank->value = 0;
 	return blank;
 }
 
 
 // Builds a tree of all the numbers in an array
 Node* create_tree(int* array, int size){
-	return NULL;
+	Node* root = create_blank_node();
+	for (int i = 0; i < size; i++) {
+		Node* node = create_blank_node();
+		node->value = array[i];
+		insert_node(&root, node);
+	}
+	return root;
 }
 
 
