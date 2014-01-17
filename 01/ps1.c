@@ -92,6 +92,8 @@ int search(Node* root, int n){
 
 // Returns a dynamically allocated node, with all fields set to NULL/0
 Node* create_blank_node(){
+	struct Node blank = {NULL, NULL, 0};
+	return &blank;
 }
 
 
