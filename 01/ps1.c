@@ -132,6 +132,15 @@ Node* create_tree(int* array, int size){
 
 // Prints all the nodes of the tree.
 void print_tree(Node* n, int offset){
+	if (n == NULL) {
+		return;
+	}
+	for (int i = 0; i < offset; i++) {
+		printf(" ");
+	}
+	printf("%i\n", n->value);
+	print_tree(n->left, offset+1);
+	print_tree(n->right, offset+1);
 }
 
 
