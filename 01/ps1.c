@@ -70,11 +70,27 @@ void quicksort(int* array, int p, int r) {
 		quicksort(array, (q+1), r);
 	}
 }
+void bubblesort(int* array, int size) {
+	int swapped = 0;
+	for (int i = 1; i < size; i++) {
+		if (array[i-1] > array[i]) {
+			int temp = array[i];
+			array[i] = array[i-1];
+			array[i-1] = temp;
+			swapped = 1;
+		}
+	}
+	if (swapped == 1) {
+		bubblesort(array, size);
+	}
+}
 // Should sort the numbers in array in increasing order
 void sort(int* array, int size){
 	// let's implement quicksort, whoo.
-	quicksort(array, 0, size);
+//	quicksort(array, 0, size-1);
+	bubblesort(array, size);
 }
+
 
 
 
