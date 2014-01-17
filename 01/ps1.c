@@ -44,6 +44,8 @@ void print_array(int* array, int size){
 
 
 // Quicksort!
+// (NOTE: IT DOESN'T WORK. YET I DID NOT HAVE THE HEART
+//  TO REMOVE IT)
 int quicksort_partition(int* array, int p, int r) {
 	int pivot = array[r];
 	int i = (p-1);
@@ -123,7 +125,17 @@ void insert_node(Node** root, Node* node){
 // Searches for the number n in the tree rooted at root.
 // Should return 1 if the number is present, and 0 if not.
 int search(Node* root, int n){
-	return 0;
+	if (root == NULL)
+		return 0;
+
+	if (n == root->value)
+		return 1;
+
+	if (n < root->value) {
+		return search(root->left, n);
+	} else {
+		return search (root->right, n);
+	}
 }
 
 
