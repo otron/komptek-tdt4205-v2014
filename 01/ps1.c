@@ -43,24 +43,8 @@ void print_array(int* array, int size){
 }
 
 
-// Should sort the numbers in array in increasing order
-void sort(int* array, int size){
-	// let's implement quicksort, whoo.
-	quicksort(array, 0, size);
-}
-
 // Quicksort!
-void quicksort(int* array, int p, int r) {
-	// from page 171 of "Introduction to Algorithms", by Cormen et. al
-	// (you know, the one known colloquially as "Cormen")
-	if (p < r) {
-		int q = quicksort_partition(array, p, r);
-		quicksort(array, p, (q-1));
-		quicksort(array, (q+1), r);
-	}
-}
-
-int quicksort_partition(int* array, p, r) {
+int quicksort_partition(int* array, int p, int r) {
 	int pivot = array[r];
 	int i = (p-1);
 	int temp;
@@ -77,28 +61,67 @@ int quicksort_partition(int* array, p, r) {
 	array[i] = pivot;
 	return i;
 }
+void quicksort(int* array, int p, int r) {
+	// from page 171 of "Introduction to Algorithms", by Cormen et. al
+	// (you know, the one known colloquially as "Cormen")
+	if (p < r) {
+		int q = quicksort_partition(array, p, r);
+		quicksort(array, p, (q-1));
+		quicksort(array, (q+1), r);
+	}
+}
+// Should sort the numbers in array in increasing order
+void sort(int* array, int size){
+	// let's implement quicksort, whoo.
+	quicksort(array, 0, size);
+}
+
+
 
 
 // Inserts the node into the tree rooted at the node pointed to by root
 void insert_node(Node** root, Node* node){
+	// wait so I just insert the node somewhere in the tree?
+	// no, apparently it's a binary tree.
+	// weird how I had to look up the slides from the recitation to
+	// figure that out. You'd think they'd put it in the assignment text.
+
+	if (node == NULL) {
+		return;
+	}
+
+	if (*root == NULL) {
+		*root = node;
+		//*root is a Node*, right? Yeah let's roll with that.
+		return;
+	}
+
+	if (node->value < (*root)->value) {
+		insert_node(&((*root)->left), node);
+	} else {
+		insert_node(&((*root)->right), node);
+	}
 }
 
 
 // Searches for the number n in the tree rooted at root.
 // Should return 1 if the number is present, and 0 if not.
 int search(Node* root, int n){
+	return 0;
 }
 
 
 // Returns a dynamically allocated node, with all fields set to NULL/0
 Node* create_blank_node(){
-	struct Node blank = {NULL, NULL, 0};
-	return &blank;
+	Node* blank = (Node*)malloc(sizeof(Node));
+	blank->value = 0;
+	return blank;
 }
 
 
 // Builds a tree of all the numbers in an array
 Node* create_tree(int* array, int size){
+	return NULL;
 }
 
 
@@ -121,6 +144,7 @@ double x_cubed(double x){
 
 // Computes the definite integral of the function using the rectangle method
 double integrate(double (*function)(double), double start, double end, double stepsize){
+	return 0;
 }
 
 
