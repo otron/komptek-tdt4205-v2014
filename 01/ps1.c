@@ -187,7 +187,17 @@ double x_cubed(double x){
 
 // Computes the definite integral of the function using the rectangle method
 double integrate(double (*function)(double), double start, double end, double stepsize){
-	return 0;
+	// stepsize = h
+	// start 	= a
+	// end		= b
+	// N		= (b-a)/h
+	int rectangles = (end-start)/stepsize;
+	double result = 0;
+	for (int i = 0; i < rectangles; i++) {
+		double x = start + (i*stepsize);
+		result += stepsize * function(x);
+	}
+	return result;
 }
 
 
