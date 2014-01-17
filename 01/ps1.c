@@ -137,7 +137,8 @@ Node* create_blank_node(){
 // Builds a tree of all the numbers in an array
 Node* create_tree(int* array, int size){
 	Node* root = create_blank_node();
-	for (int i = 0; i < size; i++) {
+	root->value = array[0];
+	for (int i = 1; i < size; i++) {
 		Node* node = create_blank_node();
 		node->value = array[i];
 		insert_node(&root, node);
