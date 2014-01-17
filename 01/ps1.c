@@ -45,6 +45,37 @@ void print_array(int* array, int size){
 
 // Should sort the numbers in array in increasing order
 void sort(int* array, int size){
+	// let's implement quicksort, whoo.
+	quicksort(array, 0, size);
+}
+
+// Quicksort!
+void quicksort(int* array, int p, int r) {
+	// from page 171 of "Introduction to Algorithms", by Cormen et. al
+	// (you know, the one known colloquially as "Cormen")
+	if (p < r) {
+		int q = quicksort_partition(array, p, r);
+		quicksort(array, p, (q-1));
+		quicksort(array, (q+1), r);
+	}
+}
+
+int quicksort_partition(int* array, p, r) {
+	int pivot = array[r];
+	int i = (p-1);
+	int temp;
+	for (int j = p; p < r; p++) {
+		if (array[j] <= pivot) {
+			i++;
+			temp = array[j];
+			array[j] = array[i];
+			array[i] = temp;
+		}
+	}
+	i++;
+	array[r] = array[i];
+	array[i] = pivot;
+	return i;
 }
 
 
