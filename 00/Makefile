@@ -2,8 +2,9 @@
 all:
 
 report:
-	pdflatex assignment-00.tex
-	open assignment-00.pdf
+	pdflatex -jobname report assignment-00.tex
+	pdflatex -jobname report assignment-00.tex
+	open report.pdf
 
 code:
 	
