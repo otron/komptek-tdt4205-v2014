@@ -74,6 +74,68 @@ Well, okay, figure~\ref{fig:1-1-a} is a DFA but hey, a DFA is technically a NFA 
 \end{center}
 \end{figure}
 
+\subsection{b) Convert the NFA in [figure] to an equivalent DFA.}
+I used Algorithm 3.20 on page 153 in \textsc{The Dragon Book}.
+See Figure~\ref{fig:1-1-2} for the DFA.
+
+The NFA's alphabet is $\{a, b, c, d\}$
+
+\begin{table}[H]
+\begin{center}
+	\begin{tabular}{|c|c|}
+	\hline
+	NFA State $s$ & $\epsilon$\textit{-closure(s)} \\
+   	\hline
+	1 & \{1, 2, 3\} \\
+   	\hline
+	2 & \{2\} \\
+	\hline
+	3 & \{3\} \\
+   	\hline
+	4 & \{2, 4, 5\} \\
+   	\hline
+	5 & \{5\} \\
+	\hline
+	\end{tabular}
+	\caption{$\epsilon$-closures for the NFA.}
+\end{center}
+\end{table}
+
+\begin{table}[H]
+\begin{center}
+	\begin{tabular}{|c c | c | c | c | c|}
+	\hline
+	NFA State & DFA State & $a$ & $b$ & $c$ & $d$ \\
+	\hline \hline
+	\{1, 2, 3\} & $A$ & $B$ & $C$ & $D$ & $E$ \\
+	\hline 
+	\{2\} & $B$ & $\emptyset$ & $\emptyset$ & $D$ & $\emptyset$ \\
+	\hline 
+	\{3\} & $C$ & $\emptyset$ & $\emptyset$ & $E$ & $\emptyset$ \\
+	\hline 
+	\{2, 5\} & $D$ & $\emptyset$ & $\emptyset$ & $F$ & $\emptyset$ \\
+	\hline 
+	\{2, 4, 5\} & $E$ & $\emptyset$ & $F$ & $F$ & $\emptyset$ \\
+	\hline 
+	\{5\} & $F$ & $\emptyset$ & $\emptyset$ & $\emptyset$ & $\emptyset$ \\
+	\hline 
+	\end{tabular} 
+	\label{tab:1-1-b-tt}
+	\caption{Transition table for the DFA.}
+\end{center}
+\end{table}
+
+\begin{figure}[H]
+\begin{center}
+	\input{gfx/1-1-b.tex}
+	\caption{The finished DFA.}
+	\label{fig:1-1-b}
+\end{center}
+\end{figure}
+
+
+\subsection{c) Why will this \texttt{flex} program not work? Could it be improved to make it work?}
+Uhh, is it because it removes the entire while-loop along with its contents?
 
 
 \end{document}
