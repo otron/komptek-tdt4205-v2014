@@ -27,6 +27,7 @@
 \usepackage{listings} % for code segment environments.
 % see http://en.wikibooks.org/wiki/LaTeX/Source_Code_Listings
 \usepackage{tikz} % for FSM drawings from http://madebyevan.com/fsm/
+\usepackage{float} % unlocks [H] for float-placement.
 
 %%% HEADERS & FOOTERS
 \usepackage{fancyhdr} % This should be set AFTER setting up the page geometry
@@ -64,9 +65,15 @@ Assignment 02\\
 \part{Theory}
 \section{Problem 1, Regular languages}
 \subsection{a) Convert the regular expression \texttt{a(b|c)d*e} to a NFA.}
-\section{}
-Does it look all proper-like?
-\newpage
-WE ARE TESTING STUFF NOW 
+Well, okay, figure~\ref{fig:1-1-a} is a DFA but hey, a DFA is technically a NFA so it's fine. \textit{Sshhh}.
+\begin{figure}[H]
+\begin{center}
+\input{gfx/1-1-a.tex}
+\caption{NFA for the regular expression \texttt{a(b|c)d*e}.}
+\label{fig:1-1-a}
+\end{center}
+\end{figure}
+
+
 
 \end{document}
