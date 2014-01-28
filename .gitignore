@@ -3,6 +3,9 @@
 *.aux
 *.pdf
 
+# code output
+*.out
+
 # stuff
 *.gz
 #fucking macs
