@@ -2,3 +2,8 @@
 *.log
 *.aux
 *.pdf
+
+# stuff
+*.gz
+#fucking macs
+*.DS_Store
