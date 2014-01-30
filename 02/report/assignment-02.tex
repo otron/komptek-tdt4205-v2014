@@ -137,5 +137,21 @@ The NFA's alphabet is $\{a, b, c, d\}$
 \subsection{c) Why will this \texttt{flex} program not work? Could it be improved to make it work?}
 Uhh, is it because it removes the entire while-loop along with its contents?
 
+\section{Problem 2, Grammars}
+Consider the context free grammar:
+\begin{table}[H]
+%\begin{center}
+	\begin{tabular}{lcl}
+	S & ::= & NvN\textbar Sp \\
+	N & ::= & m\textbar mp 
+	\end{tabular}
+%\end{center}
+\end{table}
+
+\subsection{a) What is an ambiguous grammar?}
+A grammar is ambiguous if there exists some string of terminals from the grammar that can be parsed into more than one parse tree.
+So for unambiguous grammars, there exists only one possible parse tree for any given string of terminals.
+With an ambiguous grammar it's possible to create a string of terminals that could generate more than one parse tree.
+
 
 \end{document}
