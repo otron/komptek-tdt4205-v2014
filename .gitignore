@@ -2,6 +2,9 @@
 *.log
 *.aux
 *.pdf
+*.ild
+*.ing
+
 
 # code output
 *.out

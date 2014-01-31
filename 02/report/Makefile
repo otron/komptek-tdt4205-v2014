@@ -5,5 +5,5 @@ all:
 	open report.pdf
 
 clean:
-	rm *.aux *.toc *.log
+	rm *.aux *.toc *.log *.ind *.ilg
 
