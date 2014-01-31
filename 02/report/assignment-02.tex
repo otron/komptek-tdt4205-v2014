@@ -143,9 +143,9 @@ Uhh, is it because it removes the entire while-loop along with its contents?
 Consider the context free grammar:
 \begin{table}[H]
 %\begin{center}
-	\begin{tabular}{lcl}
-	S & ::= & NvN\textbar Sp \\
-	N & ::= & m\textbar mp 
+	\begin{tabular}{l}
+	$S\longrightarrow NvN\:\vert \: Sp$\\
+	$N\longrightarrow m\:\vert \: mp$
 	\end{tabular}
 %\end{center}
 \end{table}
@@ -180,5 +180,7 @@ Per my answer to the previous question, this provides evidence that the grammar 
 A left recursive production is a production where the leftmost symbol of the production's body is the same as the nonterminal at its head.
 A grammar is considered to be left recursive if it contains one or more left recursive productions or if such a production can be derived through intermediate productions in the grammar.
 
+\subsection{d) Is the grammar above left recursive? Justify your answer.}
+Yes, because it contains the left recursive production $S\rightarrow Sp$.
 
 \end{document}
