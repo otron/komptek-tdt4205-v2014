@@ -22,12 +22,13 @@
 \usepackage{array} % for better arrays (eg matrices) in maths
 \usepackage{paralist} % very flexible & customisable lists (eg. enumerate/itemize, etc.)
 \usepackage{verbatim} % adds environment for commenting out blocks of text & for better verbatim
-\usepackage{subfig} % make it possible to include more than one captioned figure/table in a single float
 % These packages are all incorporated in the memoir class to one degree or another...
 \usepackage{listings} % for code segment environments.
 % see http://en.wikibooks.org/wiki/LaTeX/Source_Code_Listings
 \usepackage{tikz} % for FSM drawings from http://madebyevan.com/fsm/
+\usepackage{qtree} % for \Tree
 \usepackage{float} % unlocks [H] for float-placement.
+\usepackage{subcaption} % unlocks the subfigure environment
 
 %%% HEADERS & FOOTERS
 \usepackage{fancyhdr} % This should be set AFTER setting up the page geometry
@@ -46,9 +47,9 @@
 
 %%% ToC (table of contents) APPEARANCE
 \usepackage[nottoc,notlof,notlot]{tocbibind} % Put the bibliography in the ToC
-\usepackage[titles,subfigure]{tocloft} % Alter the style of the Table of Contents
-\renewcommand{\cftsecfont}{\rmfamily\mdseries\upshape}
-\renewcommand{\cftsecpagefont}{\rmfamily\mdseries\upshape} % No bold!
+%\usepackage[titles,subcaption]{tocloft} % Alter the style of the Table of Contents
+%\renewcommand{\cftsecfont}{\rmfamily\mdseries\upshape}
+%\renewcommand{\cftsecpagefont}{\rmfamily\mdseries\upshape} % No bold!
 
 
 \title{TDT4205 Compiler Design\\
@@ -149,9 +150,28 @@ Consider the context free grammar:
 \end{table}
 
 \subsection{a) What is an ambiguous grammar?}
+% See 2.2.4 in the book, at page 47
 A grammar is ambiguous if there exists some string of terminals from the grammar that can be parsed into more than one parse tree.
 So for unambiguous grammars, there exists only one possible parse tree for any given string of terminals.
 With an ambiguous grammar it's possible to create a string of terminals that could generate more than one parse tree.
 
+\subsection{b) Is the above grammar ambiguous? Justify your answer.}
+Yes: see Figure~\ref{fig:1-2-b} for an example of two parse trees that both produce the same string of terminals.
+Per my answer to the previous question, this provides evidence that the grammar is ambiguous.
+
+% Dammit, qtree doesn't support balancing leaf nodes on the same horizontal line.
+\begin{figure}[H]
+	\begin{subfigure}[b]{0.5\textwidth}
+		\Tree [.S [.S [.N m ] v [.N m ] ] p ]
+		\caption{}
+	\end{subfigure}
+	\quad
+	\begin{subfigure}[b]{0.5\textwidth}
+		\Tree [.S [.N m ] v [.N mp ] ]
+		\caption{}
+	\end{subfigure}
+\caption{Two parse trees producing the string \textit{mvmp}}
+\label{fig:1-2-b}
+\end{figure}
 
 \end{document}
