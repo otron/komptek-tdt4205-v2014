@@ -137,7 +137,36 @@ The NFA's alphabet is $\{a, b, c, d\}$
 
 
 \subsection{c) Why will this \texttt{flex} program not work? Could it be improved to make it work?}
-Uhh, is it because it removes the entire while-loop along with its contents?
+The first rule matches ``while'' followed by an arbitrarily long string that does not contain ``\{'', followed by a single ``\{'', followed by an arbitrarily long string that does not contain ``\}'', followed by a single ``\}''.
+This rule does not work on nested while loops.
+See Figure~\ref{fig:1-1-c} for a code example that the given flex program cannot handle.
+Experts are still uncertain whether or not it is because the example code is \textit{too hot to handle}.
+
+\begin{figure}[H]
+\begin{subfigure}[b]{0.5\textwidth}
+\begin{verbatim}
+int i = 0;
+while (1) {
+    while (1) {
+        printf("dicks"); 
+    }
+	i++;
+}
+\end{verbatim}
+\caption{One level deep nested while loops in C.}
+\end{subfigure}
+\begin{subfigure}[b]{0.5\textwidth}
+\begin{verbatim}
+int i = 0;
+    i++;
+}
+\end{verbatim}
+\caption{The C-code after running it through the flex program.}
+\end{subfigure}
+\caption{C-code that the flex program cannot handle.}
+\label{fig:1-1-c}
+\end{figure}
+
 
 \section{Problem 2, Grammars}
 Consider the context free grammar:
