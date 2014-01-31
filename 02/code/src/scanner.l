@@ -17,6 +17,16 @@ extern int outputStage; // This variable is located in vslc.c
 %option yylineno
 
 
+WHITESPACE	[\t\n\ ]+
+COMMENT		"//"[^\n]*\n
+INTEGER		[:digit:]+
+FLOAT		[0-9]+\.[0-9]+
+STRING		[^\n"\\\""]+
+IDENTIFIER	[a-zA-Z][a-zA-Z_]+
+
+
 %%
+COMMENT		{}
+INTEGER		{ RETURN( INT ); }
 .           { RETURN( yytext[0] ); }
 %%
