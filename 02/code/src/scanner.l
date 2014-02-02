@@ -18,7 +18,6 @@ extern int outputStage; // This variable is located in vslc.c
 
 
 WHITESPACE	[\t\n\ ]
-COMMENT		"//"[^\n]*\n
 DIGIT		[0-9]
 FLOATZ		[0-9]+\.[0-9]+
 STR			\"[^\n\"]+\"
@@ -74,7 +73,7 @@ PUNCT		[\(\);]
 [a-zA-Z_][a-zA-Z_0-9]* { RETURN( IDENTIFIER ); }
 {STR}	 			{ RETURN( STRING_CONST ); }
 
-COMMENT			{}
+"//"[^\n]*\n	{}
 {WHITESPACE}+	{}
 .      	     	{ RETURN( yytext[0] ); }
 %%
