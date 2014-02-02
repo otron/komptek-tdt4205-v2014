@@ -13,3 +13,6 @@
 *.gz
 #fucking macs
 *.DS_Store
+
+# vim!
+*.swp
