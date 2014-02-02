@@ -20,7 +20,6 @@ extern int outputStage; // This variable is located in vslc.c
 WHITESPACE	[\t\n\ ]
 DIGIT		[0-9]
 FLOATZ		[0-9]+\.[0-9]+
-STR			\"[^\n\"]+\"
 IDENTIFIER	[a-zA-Z_][a-zA-Z_0-9]*
 PUNCT		[\(\);]
 
@@ -29,8 +28,6 @@ PUNCT		[\(\);]
 
 
 %%
-{DIGIT}+			{ RETURN( INT_CONST ); }
-[0-9]+\.[0-9]+		{ RETURN( FLOAT ); }
 "FALSE"				{ RETURN( FALSE_CONST ); }
 "TRUE"				{ RETURN( TRUE_CONST ); }
 
@@ -70,8 +67,11 @@ PUNCT		[\(\);]
 "THIS"				{ RETURN( THIS ); }
 "NEW"				{ RETURN( NEW ); }
 
-[a-zA-Z_][a-zA-Z_0-9]* { RETURN( IDENTIFIER ); }
-{STR}	 			{ RETURN( STRING_CONST ); }
+{DIGIT}+			{ RETURN( INT_CONST ); }
+[0-9]+\.[0-9]+		{ RETURN( FLOAT ); }
+
+[a-zA-Z_][a-zA-Z_0-9]* 	{ RETURN( IDENTIFIER ); }
+\"([^\n\"]|\\\")*\"		{ RETURN( STRING_CONST ); }
 
 "//"[^\n]*\n	{}
 {WHITESPACE}+	{}
