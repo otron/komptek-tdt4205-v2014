@@ -19,22 +19,21 @@ extern int outputStage; // This variable is located in vslc.c
 
 WHITESPACE	[\t\n\ ]
 COMMENT		"//"[^\n]*\n
-DIGIT		[:digit:]
+DIGIT		[0-9]
 FLOATZ		[0-9]+\.[0-9]+
 STR			\"[^\n\"]+\"
-IDENTIFIER	[a-zA-Z][a-zA-Z_]+
+IDENTIFIER	[a-zA-Z_][a-zA-Z_0-9]*
+PUNCT		[\(\);]
+
 
 
 
 
 %%
-{DIGIT}+			{ RETURN( INT ); }
-FLOATZ				{ RETURN( FLOAT ); }
-"TRUE"|"FALSE"		{ RETURN( BOOL ); }
-{STR}	 			{ RETURN( STRING_CONST ); }
-IDENTIFIER			{ RETURN( IDENTIFIER ); }
-
-
+{DIGIT}+			{ RETURN( INT_CONST ); }
+[0-9]+\.[0-9]+		{ RETURN( FLOAT ); }
+"FALSE"				{ RETURN( FALSE_CONST ); }
+"TRUE"				{ RETURN( TRUE_CONST ); }
 
 
 "+"					{ RETURN( yytext[0] ); }
@@ -72,6 +71,8 @@ IDENTIFIER			{ RETURN( IDENTIFIER ); }
 "THIS"				{ RETURN( THIS ); }
 "NEW"				{ RETURN( NEW ); }
 
+[a-zA-Z_][a-zA-Z_0-9]* { RETURN( IDENTIFIER ); }
+{STR}	 			{ RETURN( STRING_CONST ); }
 
 COMMENT			{}
 {WHITESPACE}+	{}
