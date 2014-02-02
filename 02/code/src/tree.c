@@ -145,6 +145,35 @@ node_t * node_init ( nodetype_t type,
 		int n_children,
 		va_list child_list )
 {
+	// create an empty node
+	node_t* blank = (node_t*)malloc(sizeof(node_t));
+
+	// stuff it
+	// NAME YOUR CREATION
+	blank->label = label;
+	// Don't forget the children
+	blank->n_children = n_children;
+	blank->children = (node_t**)malloc(n_children * sizeof(node_t*)); //will this work?
+	// it shooouuullddd (?) malloc enough room for n_children node_t-pointers
+
+	// from reading up on va_list it seems like the thing is to call
+	// va_arg(child_list, node_t*) to get the next argument in the va_list
+	// no wait does va_arg(child_list) just return the next entry?
+	// I'll try both!
+	for (int i = 0; i < n_children; i++) {
+		blank->children[i] = va_arg(child_list, node_t*);
+	}
+
+	// type stuff
+	blank->nodetype = type;
+	blank->expression_type = expression_type;
+
+	// base_data_type_t is an enum defined in symtab.h
+	// Hm, I think I have to create an instance of the data_type_t struct
+	blank->data_type.base_type = base_type; 
+
+
+
 
 }
 
