@@ -178,8 +178,10 @@ node_t * node_init ( nodetype_t type,
 }
 
 
+/* Should free the memory of the argument node */
 void node_finalize ( node_t *discard )
 {
+	//right, so...
 
 }
 
