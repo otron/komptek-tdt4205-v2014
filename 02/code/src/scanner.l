@@ -16,21 +16,12 @@ extern int outputStage; // This variable is located in vslc.c
 %option noyywrap
 %option yylineno
 
-/* TOKENS *
-
-%token INT_CONST FLOAT_CONST TRUE_CONST FALSE_CONST STRING_CONST
-%token INT FLOAT BOOL VOID IDENTIFIER
-%token ASSIGN FUNC START PRINT RETURN IF THEN ELSE END WHILE DO
-%token EQUAL GEQUAL LEQUAL NEQUAL AND OR  
-%token _CLASS_ THIS HAS WITH NEW
-
-*/
 
 WHITESPACE	[\t\n\ ]
 COMMENT		"//"[^\n]*\n
 DIGIT		[:digit:]
-FLOAT		[0-9]+\.[0-9]+
-STRING		\"[^\n\"]+\"
+FLOATZ		[0-9]+\.[0-9]+
+STR			\"[^\n\"]+\"
 IDENTIFIER	[a-zA-Z][a-zA-Z_]+
 
 
@@ -38,9 +29,9 @@ IDENTIFIER	[a-zA-Z][a-zA-Z_]+
 
 %%
 {DIGIT}+			{ RETURN( INT ); }
-FLOAT				{ RETURN( FLOAT ); }
+FLOATZ				{ RETURN( FLOAT ); }
 "TRUE"|"FALSE"		{ RETURN( BOOL ); }
-STRING				{ RETURN( STRING ); }
+{STR}	 			{ RETURN( STRING_CONST ); }
 IDENTIFIER			{ RETURN( IDENTIFIER ); }
 
 
