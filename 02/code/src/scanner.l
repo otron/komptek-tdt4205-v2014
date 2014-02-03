@@ -68,7 +68,7 @@ PUNCT		[\(\);]
 "NEW"				{ RETURN( NEW ); }
 
 {DIGIT}+			{ RETURN( INT_CONST ); }
-[0-9]+\.[0-9]+		{ RETURN( FLOAT ); }
+[0-9]+\.[0-9]+		{ RETURN( FLOAT_CONST ); }
 
 [a-zA-Z_][a-zA-Z_0-9]* 	{ RETURN( IDENTIFIER ); }
 \"([^\n\"]|\\\")*\"		{ RETURN( STRING_CONST ); }
