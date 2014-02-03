@@ -176,8 +176,7 @@ node_t * node_init ( nodetype_t type,
 
 
 /* Should free the memory of the argument node */
-void node_finalize ( node_t *discard )
-{
+void node_finalize ( node_t *discard ) {
 	//right, so...
 	// just, like, free all the parts of a node_t struct that are dynamically allocated?
 	if (discard != NULL) {
@@ -187,17 +186,18 @@ void node_finalize ( node_t *discard )
 
 		// free the children
 		if (discard->children != NULL) {
-			for (int i = 0; i < discard->n_children; i++) {
-				if (discard->children[i] != NULL)
-					free (discard->children[i]);
-			}
+			destroy_subtree(NULL, discard);
 			free(discard->children);
 		}
+		free(discard);
 	}
 }
 
-
-void destroy_subtree ( FILE *output, node_t *discard )
-{
-
+/* Should recursively free the memory for the subtree below the given node */
+void destroy_subtree ( FILE *output, node_t *discard ) {
+	if (discard != NULL)
+		if (discard->children != NULL)
+			for (int i = 0; i < discard->n_children; i++) {
+				node_finalize(discard->children[i]);
+			}
 }
