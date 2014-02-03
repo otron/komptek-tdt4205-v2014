@@ -145,33 +145,45 @@ node_t * node_init ( nodetype_t type,
 		int n_children,
 		va_list child_list )
 {
-	// create an empty node
-	node_t* blank = (node_t*)malloc(sizeof(node_t));
+	/* STUFF 
+		nodetype_t 			=> struct
+		base_data_type_t 	=> enum
+		data_type_t			=> struct
+		expression_type_t	=> struct
+	 */
 
-	// stuff it
-	// NAME YOUR CREATION
+	// Step 1: Create an empty node
+	node_t* blank = (node_t*) malloc(sizeof(node_t));
+
+	// Step 2: I guess like, just, assign the given label to the new node?
 	blank->label = label;
-	// Don't forget the children
-	blank->n_children = n_children;
-	blank->children = (node_t**)malloc(n_children * sizeof(node_t*)); //will this work?
-	// it shooouuullddd (?) malloc enough room for n_children node_t-pointers
 
-	// from reading up on va_list it seems like the thing is to call
-	// va_arg(child_list, node_t*) to get the next argument in the va_list
-	// no wait does va_arg(child_list) just return the next entry?
-	// I'll try both!
-	for (int i = 0; i < n_children; i++) {
-		blank->children[i] = va_arg(child_list, node_t*);
-	}
-
-	// type stuff
+	// Step 3: the node's type, then? Oh look it's a 1-1 thing.
 	blank->nodetype = type;
+
+	// Step 4: expression_type!
 	blank->expression_type = expression_type;
 
-	// base_data_type_t is an enum defined in symtab.h
-	// Hm, I think I have to create an instance of the data_type_t struct
-	blank->data_type.base_type = base_type; 
-	// naw let's just see if this works first.
+	// Step 5: the children. the node_t** at blank->children should
+	//	have room for n_children children, which means malloc
+	//	should allocate (n_children * sizeof(node_t*)) memory space
+	blank->children = (node_t**) malloc(sizeof(node_t*) * n_children);
+	blank->n_children = n_children;
+	// Step 5-a: populatin'.
+	for (int i = 0; i < n_children; i++) {
+		blank->children[i] = va_arg(child_list, node_t*);
+		// if I am correct about how va_lists work, then va_arg()
+		// should return the next node_t* when called.
+		// haha, imagine that, something hinging on me being correct.
+	}
+
+	// Step 6: base_type
+	// huh, do I have to create a new data_type_t struct instance?
+	// ooor can I just set the base type of blank's data_type?
+	// node_t.data_type isn't dynamically allocated, after all.
+	// That's how it works, right?
+	blank->data_type.base_type = base_type;
+
 }
 
 
