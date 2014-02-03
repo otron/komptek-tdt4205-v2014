@@ -178,16 +178,149 @@ class_list		: class {
 					$$ = CN(class_list_n, 1, $1);
 				  }
 				| class_list class {
-					$$ = CN(class_list_n, 2, $1, $2);
+					$$ = CN(class_list_n, 2, $1, $2); 
 				}
 				;
 class			: CLASS variable HAS declaration_list WITH function_list END {
-					$$ = 
+					$$ = CN(class_n, 3, $2, $4, $6); 
+				}
+				;
+declaration_list: declaration_list declaration_statement ';' { 
+					$$ = CN(declaration_list, 2, $1, $2);
+				}
+				| /* %empty */
+				;
+statement		: declaration_statement ';' {
+					$$ = CN(statement_n, 1, $1);
+				}
+				| assignment_statement ';' {
+					$$ = CN(statement_n, 1, $1);
+				}
+				| if_statement {
+					$$ = CN(statement_n, 1, $1);
+				}
+				| while_statement {
+					$$ = CN(statement_n, 1, $1);
+				}
+				| print_statement ';' {
+					$$ = CN(statement_n, 1, $1);
+				}
+				| return_statement ';' {
+					$$ = CN(statement_n, 1, $1);
+				}
+				| call ';' {
+					$$ = CN(statement_n, 1, $1);
+				}
+				;
+declaration_statement	: type variable {
+							$$ = CN(declaration_statement_n, 2, $1, $2);
+						  }
+						;
+assignment_statement	: lvalue ASSIGN expression {
+							  $$ = CN(assignment_statement_n, 2, $1, $3);
+						  }
+						;
+
+if_statement	: IF expression THEN statement_list END {
+					$$ = CN(if_statement_n, 2, $2, $4);
+				}
+				| IF expression THEN statement_list ELSE statement_list END {
+					$$ = CN(if_statement_n, 3, $2, $4, $6);
 				}
 				;
 
+while_statement : WHILE expression DO statement_list END {
+					$$ = CN(while_statement_n, 2, $2, $4);
+				}
+				;
+return_statement: RETURN expression {
+					$$ = CN(return_statement_n, 1, $2);
+				}
+				;
+print_statement	: PRINT expression_list {
+					$$ = CN(print_statement_n, 1, $2);
+				}
+expression		: constant {
+					$$ = CNE(expression_n, constant_e, 1, $1);
+				}
+				| expression '+' expression {
+					$$ = CNE(expression_n, add_e, 2, $1, $3);
+				}
+				| expression '-' expression {
+					$$ = CNE(expression_n, sub_e, 2, $1, $3);
+				}
+				| expression '*' expression {
+					$$ = CNE(expression_n, mul_e, 2, $1, $3);
+				}
+				| expression '/' expression {
+					$$ = CNE(expression_n, div_e, 2, $1, $3);
+				}
+				| expression '>' expression {
+					$$ = CNE(expression_n, greater_e, 2, $1, $3);
+				}
+				| expression '<' expression {
+					$$ = CNE(expression_n, less_e, 2, $1, $3);
+				}
+				| expression '==' expression {
+					$$ = CNE(expression_n, equal_e, 2, $1, $3);
+				}
+				| expression '!=' expression {
+					$$ = CNE(expression_n, nequal_e, 2, $1, $3);
+				}
+				| expression '>=' expression {
+					$$ = CNE(expression_n, gequal_e, 2, $1, $3);
+				}
+				| expression '<=' expression {
+					$$ = CNE(expression_n, lequal_e, 2, $1, $3);
+				}
+				| expression '&&' expression {
+					$$ = CNE(expression_n, and_e, 2, $1, $3);
+				}
+				| expression '||' expression {
+					$$ = CNE(expression_n, or_e, 2, $1, $3);
+				}
+				| '-' expression {
+					$$ = CNE(expression_n, uminus_e, 1, $2);
+				}
+				| '!' expression {
+					$$ = CNE(expression_n, not_e, 1, $2);
+				}
+				| '(' expression ')' {
+					$$ = CN(expression_n, 1, $2);
+				}
+				| call {
+					$$ = CN(expression_n, 1, $1);
+				}
+				| THIS {
+					$$ = CNE(expression_n, this_e, 0);
+				}
+				| lvalue {
+					$$ = CNE(expression_n, variable_e, 1, $1);
+				}
+				| NEW type {
+					$$ = CNE(expression_n, new_e, 1, $2);
+				}
+				;
+call			: variable '(' argument_list ')' {
+					$$ = CNE(expression_n, func_call_e, 2, $1, $3);
+				}
+				| expression '.' variable '(' argument_list ')' {
+					$$ = CNE(expression_n, meth_call_e, 3, $1, $3, $5);
+				}
+				;
+lvalue			: variable {
+					$$ = CNE(expression_n, variable_e, 1, $1);
+				}
+				| expression '.' variable {
+					$$ = CNE(expression_n, class_field_e, 2, $1, $3);
+				}
+				;
+constant		: TRUE_CONST {
+					$$ = CNT(constant_n, BOOL_TYPE, 0);
+					
 
 
+				
 
 %% 
 
