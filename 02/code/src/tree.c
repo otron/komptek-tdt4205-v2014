@@ -171,10 +171,7 @@ node_t * node_init ( nodetype_t type,
 	// base_data_type_t is an enum defined in symtab.h
 	// Hm, I think I have to create an instance of the data_type_t struct
 	blank->data_type.base_type = base_type; 
-
-
-
-
+	// naw let's just see if this works first.
 }
 
 
@@ -182,7 +179,21 @@ node_t * node_init ( nodetype_t type,
 void node_finalize ( node_t *discard )
 {
 	//right, so...
+	// just, like, free all the parts of a node_t struct that are dynamically allocated?
+	if (discard != NULL) {
+		// free the label (char array)
+		if (discard->label != NULL)
+			free(discard->label);
 
+		// free the children
+		if (discard->children != NULL) {
+			for (int i = 0; i < discard->n_children; i++) {
+				if (discard->children[i] != NULL)
+					free (discard->children[i]);
+			}
+			free(discard->children);
+		}
+	}
 }
 
 
