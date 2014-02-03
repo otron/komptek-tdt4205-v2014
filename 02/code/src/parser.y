@@ -135,8 +135,59 @@ int yylex ( void );                 /* Defined in the generated scanner */
  */ 
 
 %%
+program 		: function_list 
+					{ root = CN(program_n, 1, $1); }
+				| class_list function_list 
+					{ root = CN(program_n, 2, $1, $2); }
+				;
+function		: type FUNC variable '(' parameter_list ')' START statement_list END 
+					{ $$ = CN(function_n, 4, $1, $3, $5, $8); }
+				;
+function_list	: function_list function
+					{ $$ = CN(function_list_n, 2, $1, $2); }
+				| /* %empty */
+				;
+statement_list	: statement
+					{ $$ = CN(statement_list_n, 1, $1); }
+				| satement_list statement
+					{ $$ = CN(statement_list_n, 2, $1, $2); }
+				;
+variable_list	: declaration_statement
+					{ $$ = CN(variable_list_n, 1, $1); }
+				| variable_list ',' declaration_statement
+					{ $$ = CN(variable_list_n, 2, $1, $3); }
+				;
+expression_list : expression { 
+					$$ = CN(expression_list_n, 1, $1); 
+				  }
+				| expression_list ',' expression { 
+					$$ = CN(expression_list_n, 2, $1, $3); 
+				  }
+				;
+parameter_list	: variable_list { 
+					$$ = CN(parameter_list_n, 1, $1); 
+				  }
+				| /* %empty */
+				;
+argument_list	: expression_list {
+					$$ = CN(argument_list_n, 1, $1); 
+				  }
+				| /* %empty */
+				;
+class_list		: class { 
+					$$ = CN(class_list_n, 1, $1);
+				  }
+				| class_list class {
+					$$ = CN(class_list_n, 2, $1, $2);
+				}
+				;
+class			: CLASS variable HAS declaration_list WITH function_list END {
+					$$ = 
+				}
+				;
 
-program : ;
+
+
 
 %% 
 
