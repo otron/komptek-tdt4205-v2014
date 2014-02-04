@@ -186,7 +186,7 @@ class			: _CLASS_ variable HAS declaration_list WITH function_list END {
 				}
 				;
 declaration_list: declaration_list declaration_statement ';' { 
-					$$ = CN(declaration_list, 2, $1, $2);
+					$$ = CN(declaration_list_n, 2, $1, $2);
 				}
 				| /* %empty */
 				;
@@ -329,7 +329,10 @@ constant		: TRUE_CONST {
 				}
 				| FLOAT_CONST {
 					$$ = CNT(constant_n, FLOAT_TYPE, 0);
-					$$->float_const = $1;
+					SetFloat($$, yytext);
+					// need to convert the string token to a float
+					// ha ha no I do not because we got help methods for that
+					// Thanks, guy.
 				}
 				| STRING_CONST {
 					$$ = CNT(constant_n, STRING_CONST, 0);
