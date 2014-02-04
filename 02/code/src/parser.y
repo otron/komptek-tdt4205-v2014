@@ -146,6 +146,7 @@ function		: type FUNC variable '(' parameter_list ')' START statement_list END
 function_list	: function_list function
 					{ $$ = CN(function_list_n, 2, $1, $2); }
 				| /* %empty */
+					{ $$ = NULL;} 
 				;
 statement_list	: statement
 					{ $$ = CN(statement_list_n, 1, $1); }
@@ -167,12 +168,16 @@ expression_list : expression {
 parameter_list	: variable_list { 
 					$$ = CN(parameter_list_n, 1, $1); 
 				  }
-				| /* %empty */
+				| /* %empty */ {
+					$$ = NULL;
+				}
 				;
 argument_list	: expression_list {
 					$$ = CN(argument_list_n, 1, $1); 
 				  }
-				| /* %empty */
+				| /* %empty */ {
+					$$ = NULL;
+				} 
 				;
 class_list		: class { 
 					$$ = CN(class_list_n, 1, $1);
@@ -188,7 +193,9 @@ class			: _CLASS_ variable HAS declaration_list WITH function_list END {
 declaration_list: declaration_list declaration_statement ';' { 
 					$$ = CN(declaration_list_n, 2, $1, $2);
 				}
-				| /* %empty */
+				| /* %empty */ {
+					$$ = NULL;
+				}
 				;
 statement		: declaration_statement ';' {
 					$$ = CN(statement_n, 1, $1);
@@ -261,22 +268,22 @@ expression		: constant {
 				| expression '<' expression {
 					$$ = CNE(expression_n, less_e, 2, $1, $3);
 				}
-				| expression '==' expression {
+				| expression EQUAL expression {
 					$$ = CNE(expression_n, equal_e, 2, $1, $3);
 				}
-				| expression '!=' expression {
+				| expression NEQUAL expression {
 					$$ = CNE(expression_n, nequal_e, 2, $1, $3);
 				}
-				| expression '>=' expression {
+				| expression GEQUAL expression {
 					$$ = CNE(expression_n, gequal_e, 2, $1, $3);
 				}
-				| expression '<=' expression {
+				| expression LEQUAL expression {
 					$$ = CNE(expression_n, lequal_e, 2, $1, $3);
 				}
-				| expression '&&' expression {
+				| expression AND expression {
 					$$ = CNE(expression_n, and_e, 2, $1, $3);
 				}
-				| expression '||' expression {
+				| expression OR expression {
 					$$ = CNE(expression_n, or_e, 2, $1, $3);
 				}
 				| '-' expression {
@@ -295,7 +302,7 @@ expression		: constant {
 					$$ = CNE(expression_n, this_e, 0);
 				}
 				| lvalue {
-					$$ = CNE(expression_n, variable_e, 1, $1);
+					$$ = CN(expression_n, 1, $1);
 				}
 				| NEW type {
 					$$ = CNE(expression_n, new_e, 1, $2);
@@ -325,7 +332,7 @@ constant		: TRUE_CONST {
 				}
 				| INT_CONST {
 					$$ = CNT(constant_n, INT_TYPE, 0);
-					$$->int_const = $1;
+					SetInteger($$, yytext);
 				}
 				| FLOAT_CONST {
 					$$ = CNT(constant_n, FLOAT_TYPE, 0);
@@ -336,7 +343,7 @@ constant		: TRUE_CONST {
 				}
 				| STRING_CONST {
 					$$ = CNT(constant_n, STRING_CONST, 0);
-					$$->string_const = STRDUP($1);
+					SetString($$, yytext);
 				}
 				;
 type			: INT {
@@ -360,7 +367,7 @@ type			: INT {
 				}
 				;
 variable		: IDENTIFIER {
-					$$ = CNL(variable_n, STRDUP($1), 0);
+					$$ = CNL(variable_n, STRDUP(yytext), 0);
 				}
 				;
 					
