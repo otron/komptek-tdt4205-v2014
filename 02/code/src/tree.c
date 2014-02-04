@@ -183,7 +183,7 @@ node_t * node_init ( nodetype_t type,
 	// node_t.data_type isn't dynamically allocated, after all.
 	// That's how it works, right?
 	blank->data_type.base_type = base_type;
-
+	return blank;
 }
 
 
