@@ -149,7 +149,7 @@ function_list	: function_list function
 				;
 statement_list	: statement
 					{ $$ = CN(statement_list_n, 1, $1); }
-				| satement_list statement
+				| statement_list statement
 					{ $$ = CN(statement_list_n, 2, $1, $2); }
 				;
 variable_list	: declaration_statement
@@ -181,7 +181,7 @@ class_list		: class {
 					$$ = CN(class_list_n, 2, $1, $2); 
 				}
 				;
-class			: CLASS variable HAS declaration_list WITH function_list END {
+class			: _CLASS_ variable HAS declaration_list WITH function_list END {
 					$$ = CN(class_n, 3, $2, $4, $6); 
 				}
 				;
@@ -317,6 +317,49 @@ lvalue			: variable {
 				;
 constant		: TRUE_CONST {
 					$$ = CNT(constant_n, BOOL_TYPE, 0);
+					$$->bool_const = true;
+				  }
+				| FALSE_CONST {
+					$$ = CNT(constant_n, BOOL_TYPE, 0);
+					$$->bool_const = false;
+				}
+				| INT_CONST {
+					$$ = CNT(constant_n, INT_TYPE, 0);
+					$$->int_const = $1;
+				}
+				| FLOAT_CONST {
+					$$ = CNT(constant_n, FLOAT_TYPE, 0);
+					$$->float_const = $1;
+				}
+				| STRING_CONST {
+					$$ = CNT(constant_n, STRING_CONST, 0);
+					$$->string_const = STRDUP($1);
+				}
+				;
+type			: INT {
+					$$ = CN(type_n, 0);
+					$$->data_type.base_type = INT_TYPE;
+				  }
+				| FLOAT {
+					$$ = CN(type_n, 0);
+					$$->data_type.base_type = INT_TYPE;
+				}
+				| BOOL {
+					$$ = CN(type_n, 0);
+					$$->data_type.base_type = BOOL_TYPE;
+				}
+				| VOID {
+					$$ = CN(type_n, 0);
+					$$->data_type.base_type = VOID_TYPE;
+				}
+				| variable {
+					$$ = CN(type_n, 1, $1);
+				}
+				;
+variable		: IDENTIFIER {
+					$$ = CNL(variable_n, STRDUP($1), 0);
+				}
+				;
 					
 
 
