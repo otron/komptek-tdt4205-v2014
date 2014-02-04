@@ -145,7 +145,10 @@ function		: type FUNC variable '(' parameter_list ')' START statement_list END
 				;
 function_list	: function_list function
 					{ $$ = CN(function_list_n, 2, $1, $2); }
-				| /* %empty */
+				| /* %empty
+				  The bison documentation told me I could just write %empty
+				  (see http://www.gnu.org/software/bison/manual/bison.html#Rpcalc-Input)
+				  BUT I TRIED THAT AND THE COMPILER WAS LIKE NO MAN YOU CAN'T*/
 					{ $$ = NULL;} 
 				;
 statement_list	: statement
@@ -364,6 +367,7 @@ type			: INT {
 				}
 				| variable {
 					$$ = CN(type_n, 1, $1);
+					$$->data_type.base_type = CLASS_TYPE;
 				}
 				;
 variable		: IDENTIFIER {
