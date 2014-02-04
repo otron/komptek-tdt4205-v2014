@@ -352,7 +352,7 @@ type			: INT {
 				  }
 				| FLOAT {
 					$$ = CN(type_n, 0);
-					$$->data_type.base_type = INT_TYPE;
+					$$->data_type.base_type = FLOAT_TYPE;
 				}
 				| BOOL {
 					$$ = CN(type_n, 0);
