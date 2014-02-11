@@ -8,3 +8,6 @@ all:
 clean:
 	rm *.aux *.toc *.log *.ind *.ilg
 
+.PHONY: err
+err:
+	pdflatex -jobname report head.tex 

@@ -20,3 +20,63 @@ LR parsers are shift-reduce parsers.
 
 Ohh, also while LR parsers \textit{can} be written by hand, they're typically not because it is a lot of work.
 
+
+\section{Problem 2, Top-down parsing}
+Consider the context free grammar:
+\begin{table}[H]
+\begin{tabular}{ccl}
+	% ~ enters a nonbreaking space, which in this case just forces a space because LaTeX ignores the whitespace
+	% between \textbar and whatever comes next
+	A	& ::=	& aB \textbar ~D \textbar  ~F \\
+	B 	& ::=	& bC \\
+	C 	& ::=	& bC \textbar ~$\epsilon$ \\
+	D  	& ::=	& EB \textbar ~dBEF \\
+	E 	& ::=	& e \textbar ~$\epsilon$ \\
+	F 	& ::=	& c \textbar ~f 
+\end{tabular}
+\end{table}
+
+The grammar's terminals are \{a, b, c, d, e, f\}. \\
+Its non-terminals are \{A, B, C, D, E, F\}.
+
+\subsection{a) Tabulate the first and follow sets for the grammar.}
+% the FIRST and FOLLOW sets are associated with some grammar.
+% They allow us to choose which production to apply based on the next input symbol.
+% FIRST(S) is the set of terminals that strings derived from S may with.
+% FOLLOW(S), for a nonterminal S, is the set of terminals that can appear immediately to the right of S in some sentence
+%
+% Algorithm for FIRST(S):
+	% if S is a terminal then FIRST(S) = {S}
+	% if S ... the rest of it appears on pg 221 of the book
+Using the method described on page 221-2 of \textsc{the Dragon Book} to find the \textsc{first} and \textsc{follow} sets.
+I think it's easier if we start with the non-terminals that only have terminals in their productions.
+% oh, okay so the greek letters in the book can be empty, according to 4.2.2 "notational conventions" on pg 199
+% they also mean any string of grammar symbols, so they can represent non-terminals. That makes stuff easier.
+% wait ok so since the greek letters can be empty, that means that A -> B matches A-> aBb (lowercase is greek here) and A-> aB
+% also in A -> dBEF == A -> aF (a = dBE), or A -> dBb (b = EF).
+% fucking sheesh
+
+All right well I did that on paper here is the tabulated result:
+
+\begin{table}[H]
+\begin{center}
+\begin{tabular}{l|l|l}
+\hline
+	Symbol	& \textsc{first}		& \textsc{follow} \\ \hline \hline
+	A		& \{a, d, e, b, c, f\}	& \{\$\} \\
+	B 		& \{b\}					& \{\$, e, c, f\}\\
+	C		& \{b, $\epsilon$\}		& \{\$, e, c, f\}\\
+	D		& \{d, e, b\}			& \{\$\}\\
+	E		& \{e, $\epsilon$\}		& \{b, c, f\}\\
+	F		& \{c, f \}				& \{\$\}\\
+	a		& \{a\}					& $\emptyset$ \\
+	b		& \{b\}					& $\emptyset$\\
+	c		& \{c\}					& $\emptyset$\\
+	d		& \{d\}					& $\emptyset$\\
+	e		& \{e\}					& $\emptyset$\\
+	f		& \{f\}					& $\emptyset$\\ \hline
+\end{tabular}
+\label{tab:2a}
+\caption{\textsc{first} and \textsc{follow} sets for the Problem 2 grammar.}
+\end{center}
+\end{table}
