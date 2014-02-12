@@ -96,9 +96,9 @@ There's an algorithm for that (Algorithm 4.31 in \textsc{ye olde booke of dragon
 	 	& a 			   & b 				 & c 			   & d 	 			 & e 			   & f 				 & \$ \\ \hline
 	A 	& A$\rightarrow$aB & A$\rightarrow$D & A$\rightarrow$F & A$\rightarrow$D & A$\rightarrow$D & A$\rightarrow$F & 	  \\ \hline
 	B	& 				   & B$\rightarrow$bC&				   &				 &				   &				 &	  \\ \hline
-	C	&				   & 				 & C$\rightarrow \epsilon$ & 		 &C$\rightarrow \epsilon$ &C$\rightarrow \epsilon$&C$\rightarrow\epsilon$\\\hline
+	C	&				   & C$\rightarrow$bC& C$\rightarrow \epsilon$ & 		 &C$\rightarrow \epsilon$ &C$\rightarrow \epsilon$&C$\rightarrow\epsilon$\\\hline
 	D 	&				   & D$\rightarrow$EB & & D$\rightarrow$dBEF & D$\rightarrow$EB & &D$\rightarrow$EB \\ \hline
-	E 	& 				   & E$\rightarrow\epsilon$ & E$\rightarrow\epsilon$ & & E$\rightarrow$e & & \\ \hline
+	E 	& 				   & E$\rightarrow\epsilon$ & E$\rightarrow\epsilon$ & & E$\rightarrow$e &E$\rightarrow\epsilon$ & \\ \hline
 	F 	& 				   &			     & F$\rightarrow$c			  & & & F$\rightarrow$f & \\ \hline
 % see http://en.wikibooks.org/wiki/LaTeX/Tables#Columns_spanning_multiple_rows for how to make it span multiple rows or whatever, bro.	
 \end{tabular}
@@ -106,3 +106,39 @@ There's an algorithm for that (Algorithm 4.31 in \textsc{ye olde booke of dragon
 \label{tab:2b}
 \end{center}
 \end{table}
+
+
+\subsection{c) Show the moves a predictive, nonrecursive parser would make on the input: dbbbf. 
+Make sure to show the matched part of the input, the parser's stack, the remaining input and the action taken at each step.}
+Again there is an algorithm for this in \textsc{book: Dragon, Purple}.
+It is ``Algorithm 4.34'' and you can find it on page 226.
+
+The notation I've used in table~\ref{tab:2c} is slightly different than the one seen in Figure 4.21 on page 228 in the book:
+in table~\ref{tab:2c}, the action listed in row $n$ has been performed in row $n+1$.
+
+
+\begin{table}[H]
+\begin{center}
+\begin{tabular}{lrrl}
+	\hline \hline
+	\textsc{Matched} & \textsc{Stack} 	& \textsc{Input}	& \textsc{Action}	\\ \hline
+					 & A\$				& dbbbf\$			& Output A$\rightarrow$D		\\
+					 & D\$				& dbbbf\$			& Output D$\rightarrow$dBEF	\\
+					 & dBEF\$			& dbbbf\$			& Match d		  	\\ 
+	d				 & BEF\$			& bbbf\$			& Output B$\rightarrow$bC		\\
+	d				 & bCEF\$			& bbbf\$			& Match b			\\
+	db				 & CEF\$			& bbf\$				& Output C$\rightarrow$bC		\\
+	db				 & bCEF\$			& bbf\$				& Match b			\\
+	dbb				 & CEF\$			& bf\$				& Output C$\rightarrow$bC		\\
+	dbb				 & bCEF\$			& bf\$				& Match b			\\
+	dbbb			 & CEF\$			& f\$				& Output C$\rightarrow\epsilon$		\\
+	dbbb			 & EF\$				& f\$				& Output E$\rightarrow\epsilon$		\\
+	dbbb			 & F\$				& f\$				& Output F$\rightarrow$f		\\
+	dbbb			 & f\$				& f\$				& Match f			\\
+	dbbbf			 & \$				& \$				& 					\\ \hline					
+\end{tabular}
+\caption{Moves made by a predictive parser for the Problem 2 grammar on the input string ``dbbbf''.}
+\label{tab:2c}
+\end{center}
+\end{table}
+
