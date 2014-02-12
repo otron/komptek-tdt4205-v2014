@@ -83,11 +83,26 @@ All right well I did that on paper here is the tabulated result:
 
 \subsection{b) Construct the predictive parsing table for the grammar.}
 There's an algorithm for that (Algorithm 4.31 in \textsc{ye olde booke of dragons}
+%algo 4.31 is basically "for each production <nonterminal> -> <string of symbols>, do:
+%stuff!
+
+
 
 \begin{table}[H]
 \begin{center}
-\begin{tabular}
+\begin{tabular}{c|c|c|c|c|c|c|c}
+	\hline \hline 
+	\multirow{2}{*}{\textsc{Non-Terminal}} & \multicolumn{7}{ c }{\textsc{Input Symbol}} \\ \cline{2-8} % cline 2-8 is like \hline 'cept only for column 2-8
+	 	& a 			   & b 				 & c 			   & d 	 			 & e 			   & f 				 & \$ \\ \hline
+	A 	& A$\rightarrow$aB & A$\rightarrow$D & A$\rightarrow$F & A$\rightarrow$D & A$\rightarrow$D & A$\rightarrow$F & 	  \\ \hline
+	B	& 				   & B$\rightarrow$bC&				   &				 &				   &				 &	  \\ \hline
+	C	&				   & 				 & C$\rightarrow \epsilon$ & 		 &C$\rightarrow \epsilon$ &C$\rightarrow \epsilon$&C$\rightarrow\epsilon$\\\hline
+	D 	&				   & D$\rightarrow$EB & & D$\rightarrow$dBEF & D$\rightarrow$EB & &D$\rightarrow$EB \\ \hline
+	E 	& 				   & E$\rightarrow\epsilon$ & E$\rightarrow\epsilon$ & & E$\rightarrow$e & & \\ \hline
+	F 	& 				   &			     & F$\rightarrow$c			  & & & F$\rightarrow$f & \\ \hline
 % see http://en.wikibooks.org/wiki/LaTeX/Tables#Columns_spanning_multiple_rows for how to make it span multiple rows or whatever, bro.	
 \end{tabular}
+\caption{Predictive parsing table for the Problem 2 grammar.}
+\label{tab:2b}
 \end{center}
 \end{table}
