@@ -82,7 +82,7 @@ All right well I did that on paper here is the tabulated result:
 \end{table}
 
 \subsection{b) Construct the predictive parsing table for the grammar.}
-There's an algorithm for that (Algorithm 4.31 in \textsc{ye olde booke of dragons}
+There's an algorithm for that (Algorithm 4.31 in \textsc{ye olde booke of dragons}.)
 %algo 4.31 is basically "for each production <nonterminal> -> <string of symbols>, do:
 %stuff!
 
@@ -141,4 +141,22 @@ in table~\ref{tab:2c}, the action listed in row $n$ has been performed in row $n
 \label{tab:2c}
 \end{center}
 \end{table}
+
+\section{Problem 3, Bottom-up parsing}
+Consider the context free grammar:
+
+\begin{table}[H]
+\begin{tabular}{ccl}
+	% ~ enters a nonbreaking space, which in this case just forces a space because LaTeX ignores the whitespace
+	% between \textbar and whatever comes next
+	A	& ::=	& aB \textbar ~D \textbar ~F \\
+	B 	& ::=	& Bb \textbar ~b \\
+	D  	& ::=	& EB \textbar ~dBEF \\
+	E 	& ::=	& e \\
+	F 	& ::=	& c \textbar ~f \\
+\end{tabular}
+\end{table}
+
+\subsection{a) Construct the LR(0) automaton for this grammar.}
+
 
