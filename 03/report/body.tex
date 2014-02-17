@@ -155,8 +155,43 @@ Consider the context free grammar:
 	E 	& ::=	& e \\
 	F 	& ::=	& c \textbar ~f \\
 \end{tabular}
+\caption{The Problem 3 grammar.}
+\label{tab:3}
 \end{table}
 
+
+The grammar's terminals are \{A, B, D, E, F\} and its non-terminals are \{a, b, c, d, e, f\}.
+
+
 \subsection{a) Construct the LR(0) automaton for this grammar.}
+% Step 1. The items!
+% (4.6.2, pg 242)
+% no, no, Figure 4.33, man. Page 246.
+
+% Step 1:
+% 	Augment the grammar by adding A' -> A to it
+% Step 2:
+%	I_0 = Closure({[A' -> .A]})
+%	Add I_0 to C
+% Step 3:
+%	For each I_i in C
+%		for each grammar symbol X in I_i
+%			if GOTO(I_i, X) is not empty and not in C)
+%				add GOTO(I_i, X) to C 
+
+% Each set in C is labeled I_i, where i = 0..n
+
+% Essentially, it would seem that what we are looking for when we do
+% Goto(I, X) are items in I that contain ".X"
+
+Image depicted in Figure~\ref{fig:1-3-a} was made using \texttt{http://lucidchart.com}.
+
+\begin{figure}[H]
+\begin{center}
+\includegraphics[width=\textwidth]{gfx/1-3-a.pdf}
+\caption{The LR(0) Automaton for the Problem 3 grammar.}
+\label{fig:1-3-a}
+\end{center}
+\end{figure}
 
 
