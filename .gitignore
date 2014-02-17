@@ -1,9 +1,10 @@
 # pdflatex output
 *.log
 *.aux
-*.pdf
 *.ild
 *.ing
+*.pdf
+!**/gfx/*.pdf
 
 
 # code output
