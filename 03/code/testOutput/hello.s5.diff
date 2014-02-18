@@ -1,0 +1,17 @@
+3c3,6
+<   FUNCTION(VOID)("hello")()
+---
+>   (nil)
+>   FUNCTION()()
+>    TYPE(VOID)()
+>    VARIABLE()("hello")()
+6,8c9,13
+<     PRINT_STATEMENT()()
+<      EXPRESSION_LIST()()
+<       CONSTANT(STRING)("Hello, world!")()
+---
+>     STATEMENT()()
+>      PRINT_STATEMENT()()
+>       EXPRESSION_LIST()()
+>        EXPRESSION()(CONSTANT)
+>         CONSTANT(STRING)("Hello, world!")()

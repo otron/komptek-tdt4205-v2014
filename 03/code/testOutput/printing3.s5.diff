@@ -1,0 +1,21 @@
+3c3,6
+<   FUNCTION(VOID)("printing")()
+---
+>   (nil)
+>   FUNCTION()()
+>    TYPE(VOID)()
+>    VARIABLE()("printing")()
+6,9c9,16
+<     PRINT_STATEMENT()()
+<      EXPRESSION_LIST()()
+<       CONSTANT(STRING)("22 is ")()
+<       CONSTANT(INTEGER)(22)()
+---
+>     STATEMENT()()
+>      PRINT_STATEMENT()()
+>       EXPRESSION_LIST()()
+>        EXPRESSION_LIST()()
+>         EXPRESSION()(CONSTANT)
+>          CONSTANT(STRING)("22 is ")()
+>        EXPRESSION()(CONSTANT)
+>         CONSTANT(INTEGER)(22)()

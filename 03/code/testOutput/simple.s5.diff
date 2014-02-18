@@ -1,0 +1,15 @@
+3c3,6
+<   FUNCTION(VOID)("simple")()
+---
+>   (nil)
+>   FUNCTION()()
+>    TYPE(VOID)()
+>    VARIABLE()("simple")()
+6,7c9,12
+<     RETURN_STATEMENT()()
+<      CONSTANT(INTEGER)(0)()
+---
+>     STATEMENT()()
+>      RETURN_STATEMENT()()
+>       EXPRESSION()(CONSTANT)
+>        CONSTANT(INTEGER)(0)()

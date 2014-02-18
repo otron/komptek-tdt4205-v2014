@@ -1,0 +1,10 @@
+1,9d0
+<  Simplify FUNCTION_LIST 
+<   Simplify FUNCTION 
+<    Simplify TYPE 
+<    Simplify STATEMENT_LIST 
+<     Simplify STATEMENT 
+<       Simplify EXPRESSION_LIST 
+<        Simplify EXPRESSION_LIST 
+<         Simplify EXPRESSION (CONSTANT) 
+<        Simplify EXPRESSION (CONSTANT) 

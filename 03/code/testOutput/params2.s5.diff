@@ -1,0 +1,23 @@
+3,5c3,11
+<   FUNCTION(INTEGER)("params")()
+<    VARIABLE_LIST()()
+<     DECLARATION_STATEMENT(FLOAT)("a")()
+---
+>   (nil)
+>   FUNCTION()()
+>    TYPE(INTEGER)()
+>    VARIABLE()("params")()
+>    PARAMETER_LIST()()
+>     VARIABLE_LIST()()
+>      DECLARATION_STATEMENT()()
+>       TYPE(FLOAT)()
+>       VARIABLE()("a")()
+7,8c13,17
+<     RETURN_STATEMENT()()
+<      VARIABLE()("a")()
+---
+>     STATEMENT()()
+>      RETURN_STATEMENT()()
+>       EXPRESSION()()
+>        EXPRESSION()(VARIABLE)
+>         VARIABLE()("a")()

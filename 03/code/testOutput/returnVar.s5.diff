@@ -1,0 +1,23 @@
+3,5c3,11
+<   FUNCTION(INTEGER)("nop42V2")()
+<    VARIABLE_LIST()()
+<     DECLARATION_STATEMENT(INTEGER)("variable")()
+---
+>   (nil)
+>   FUNCTION()()
+>    TYPE(INTEGER)()
+>    VARIABLE()("nop42V2")()
+>    PARAMETER_LIST()()
+>     VARIABLE_LIST()()
+>      DECLARATION_STATEMENT()()
+>       TYPE(INTEGER)()
+>       VARIABLE()("variable")()
+7,8c13,17
+<     RETURN_STATEMENT()()
+<      VARIABLE()("variable")()
+---
+>     STATEMENT()()
+>      RETURN_STATEMENT()()
+>       EXPRESSION()()
+>        EXPRESSION()(VARIABLE)
+>         VARIABLE()("variable")()
