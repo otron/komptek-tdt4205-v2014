@@ -268,8 +268,26 @@ r3 means ``reduce using production labeled (3)'', s4 means ``shift to I$_{4}$''
 	%    & STACK    & SYMBOLS       & INPUT     & ACTION
 	(1)  & 0        &               & dbbbf\$   & s3	\\
 	(2)	 & 0 3		& d				& bbbf\$	& s11	\\
-	(3)	 & 0 3 11	& db 			& bbf\$		& r5	\\
-	(4)	 & 0 3		& dB			& bbf\$		& 
-	% wait what state am I in now?
+	(3)	 & 0 3 11	& db			& bbf\$		& r5	\\
+	% What happens when we r5, B->b:
+	% 1: the expression matching the production is replaced with the symbol on the left side (so 'b' is replaced by 'B' in "SYMBOLS")
+	% 2: stack is popped n times, where n is the length (no. symbols on RHS) of the production we just reduced
+	% 3: GOTO(x, B) gets pushed onto the stack ('x' is just the top of the STACK after the previous step)
+	% 4: done?
+	(4)	 & 0 3 12	& dB			& bbf\$		& s14 	\\
+	(5)	 & 0 3 12 14& dBb			& bf\$		& r4	\\
+	% we pop 14 and 12 off the stack because the production corresponding to r4 (4) contains 2 symbols
+	% and then GOTO(3, B) (=12) is pushed onto the stack
+	(6)	 & 0 3 12	& dB			& bf\$		& s14	\\
+	(7)	 & 0 3 12 14& dBb			& f\$		& r4	\\
+	% we still do r4 because ACTION[14, f] = r4
+	% because remember that the second argument of ACTION[I, x] is the top of the input/next input symbol
+	(8)	 & 0 3 12	& dB			& f\$		& error \\
 \end{tabular}
+\caption{The moves made by a SLR parser for the Problem 3 grammar on the input ``dbbbf''.}
+\label{tab:3-c}
 \end{table}
+
+well yeah there you go: ``dbbbf'' isn't producable by the grammar.
+Assuming I've not messed up.
+Ha-ha.
