@@ -10,7 +10,7 @@ void transfer_children(Node_t* fromNode, Node_t* toNode);
 void simplify_children(Node_t* root, int depth) {
 	for (int i = 0; i < root->n_children; i++) {
 		if (root->children[i] != NULL) 
-			root->children[i]->simplify(root->children[i], depth++);
+			root->children[i]->simplify(root->children[i], depth+1);
 	}
 }
 
