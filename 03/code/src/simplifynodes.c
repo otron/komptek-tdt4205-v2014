@@ -9,7 +9,8 @@ void transfer_children(Node_t* fromNode, Node_t* toNode);
 // calls simplify() on all the children of root
 void simplify_children(Node_t* root, int depth) {
 	for (int i = 0; i < root->n_children; i++) {
-		root->children[i]->simplify(root->children[i], depth++);
+		if (root->children[i] != NULL) 
+			root->children[i]->simplify(root->children[i], depth++);
 	}
 }
 
@@ -26,12 +27,15 @@ void transfer_children(Node_t* fromNode, Node_t* toNode) {
 		fromNode->children[j] = NULL;
 	}
 	fromNode->n_children = 0;
+	fromNode->children = realloc(fromNode->children, sizeof(node_t*) * fromNode->n_children);
 }
 
 
 Node_t* simplify_default ( Node_t *root, int depth )
 {
 	
+	simplify_children(root, depth);
+	return root;
 }
 
 
@@ -40,6 +44,9 @@ Node_t *simplify_types ( Node_t *root, int depth )
 	if(outputStage == 4)
 		fprintf ( stderr, "%*cSimplify %s \n", depth, ' ', root->nodetype.text );
 
+	simplify_children(root, depth);
+
+	/*
 	// STEP 1: Check if root's base data type is CLASS_TYPE
 	if (root->data_type.base_type == CLASS_TYPE) {
 		// STEP 2: what if our assumption that root only has one child and that it's a variable-type node don't hold up?
@@ -60,7 +67,8 @@ Node_t *simplify_types ( Node_t *root, int depth )
 
 
 	// STEP end: YOU GET NOTHING.
-	return NULL;
+	*/
+	return root;
 }
 
 
@@ -69,6 +77,8 @@ Node_t *simplify_function ( Node_t *root, int depth )
 	if(outputStage == 4)
 		fprintf ( stderr, "%*cSimplify %s \n", depth, ' ', root->nodetype.text );
 
+	simplify_children(root, depth);
+	return root;
 }
 
 
@@ -76,6 +86,9 @@ Node_t *simplify_class( Node_t *root, int depth )
 {
 	if(outputStage == 4)
 		fprintf ( stderr, "%*cSimplify %s \n", depth, ' ', root->nodetype.text );
+
+	simplify_children(root, depth);
+	return root;
 }
 
 
@@ -84,6 +97,8 @@ Node_t *simplify_declaration_statement ( Node_t *root, int depth )
 	if(outputStage == 4)
 		fprintf ( stderr, "%*cSimplify %s \n", depth, ' ', root->nodetype.text );
 
+	simplify_children(root, depth);
+	return root;
 }
 
 
@@ -92,12 +107,18 @@ Node_t *simplify_single_child ( Node_t *root, int depth )
 	if(outputStage == 4)
 		fprintf ( stderr, "%*cSimplify %s \n", depth, ' ', root->nodetype.text );
 	
+	simplify_children(root, depth);
+	return root;
+	
 }
 
 Node_t *simplify_list_with_null ( Node_t *root, int depth )
 {
 	if(outputStage == 4)
 		fprintf ( stderr, "%*cSimplify %s \n", depth, ' ', root->nodetype.text );
+
+	simplify_children(root, depth);
+	return root;
 
 }
 
@@ -111,9 +132,17 @@ Node_t *simplify_list ( Node_t *root, int depth )
 	// STEP 1: call simplify on all of root's children
 	simplify_children(root, depth);
 
+	/*
 	// STEP 2: compare root's type to the type of its left child
 	// the fuck.
 	// (we are assuming that there'll only ever be another list of the same type in the left child
+	if (root->children == NULL)
+		return root;
+	if (root->children[0] == NULL)
+		return root;
+	if (root->children[1] == NULL)
+		return root;
+
 	if (root->children[0]->nodetype.index == root->nodetype.index) {
 		// wiat ok I got it let's swap the right and left child
 		// STEP 3: Swap root's left (human) and right child
@@ -132,9 +161,9 @@ Node_t *simplify_list ( Node_t *root, int depth )
 		}
 		node_finalize(human);
 	}
-
+	*/
 	// STEP N: return NULL because the recitations slides said that was cool.
-	return NULL;
+	return root;
 }
 
 
@@ -144,5 +173,7 @@ Node_t *simplify_expression ( Node_t *root, int depth )
 	if(outputStage == 4)
 		fprintf ( stderr, "%*cSimplify %s (%s) \n", depth, ' ', root->nodetype.text, root->expression_type.text );
 		
+	simplify_children(root, depth);
+	return root;
 }
 
