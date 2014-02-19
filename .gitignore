@@ -6,6 +6,8 @@
 *.pdf
 !**/gfx/*.pdf
 
+testOutput/
+
 
 # code output
 *.out
