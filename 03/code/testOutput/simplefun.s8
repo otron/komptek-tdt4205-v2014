@@ -1,5 +1,0 @@
-.data
-.INTEGER: .string "%d "
-.FLOAT: .string "%f "
-.NEWLINE: .string "\n "
-.globl main

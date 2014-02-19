@@ -1,8 +1,0 @@
-1,7d0
-<  Simplify FUNCTION_LIST 
-<   Simplify FUNCTION 
-<    Simplify TYPE 
-<    Simplify STATEMENT_LIST 
-<     Simplify STATEMENT 
-<       Simplify EXPRESSION_LIST 
-<        Simplify EXPRESSION (CONSTANT) 
