@@ -20,10 +20,12 @@ void transfer_children(Node_t* fromNode, Node_t* toNode) {
 	int no_children = fromNode->n_children + toNode->n_children;
 		// it's funny how "No." is short for "numero" which means "number of"
 	toNode->children = (Node_t**) realloc(toNode->children, sizeof(node_t*) * no_children);
-
-		
-
-
+	int i_start = toNode->n_children - 1;
+	for (int i = i_start, j = 0; i < no_children; i++, j++) {
+		toNode->children[i] = fromNode->children[j];
+		fromNode->children[j] = NULL;
+	}
+	fromNode->n_children = 0;
 }
 
 
@@ -88,27 +90,30 @@ Node_t *simplify_list ( Node_t *root, int depth )
 	// STEP 1: call simplify on all of root's children
 	simplify_children(root, depth);
 
-	// STEP 2: ????
+	// STEP 2: compare root's type to the type of its left child
 	// the fuck.
-	if (root->children[0]->nodetype == root->nodetype) {
+	// (we are assuming that there'll only ever be another list of the same type in the left child
+	if (root->children[0]->nodetype.index == root->nodetype.index) {
 		// wiat ok I got it let's swap the right and left child
-		Node_t* child = root->children[0];
+		// STEP 3: Swap root's left (human) and right child
+		Node_t* human = root->children[0];
 		root->children[0] = root->children[1];
-
-	}
-
-		
-	for (int i = 0; i < (root->n_children); i++) {
-		child = root->children[i];
-		if (child->nodetype == root->nodetype) {
-			// uh, we have to remove child from root->children
-			// we can just set the children[]-entry to NULL and realloc, right?
-			root->children[i] = NULL;
-
-			transferChildren(child, root);
+		root->children[1] = NULL;
+		// STEP 4: realloc root->children to fit the children of the human 
+		root->n_children = root->n_children - 1 + human->n_children;
+		// (we have to fit the children of human and the children of root minus human.
+		root->children = realloc(root->children, (root->n_children));
+		// STEP 5: steal those kids
+		int kid_offset = 1;
+		for (int i = 0; i < root->n_children; i++) {
+			root->children[i+kid_offset] = human->children[i];
+			human->children[i] = NULL;
 		}
+		node_finalize(human);
 	}
 
+	// STEP N: return NULL because the recitations slides said that was cool.
+	return NULL;
 }
 
 
