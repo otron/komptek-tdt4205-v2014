@@ -6,14 +6,16 @@
 *.pdf
 !**/gfx/*.pdf
 
-testOutput/
 
 
 # code output
 *.out
+testOutput/
 
 # stuff
+*.zip
 *.gz
+
 #fucking macs
 *.DS_Store
 
