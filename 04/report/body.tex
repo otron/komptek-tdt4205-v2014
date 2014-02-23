@@ -1,3 +1,88 @@
 
 \section{Problem 1, Symbol Tables}
-\subsection{}
+\subsubsection{a) What is a symbol table, and why is it needed?}
+yes
+\subsubsection{b) What kind of information is typically stored in a symbol table?}
+nope
+\subsubsection{c) Mention and briefly discuss the advantages and disadvantages of three different data structures that can be used to implement symbol tables.}
+ok
+
+
+\newpage
+\section{Problem 2, Symbol tables and blocks}
+Consider the following code in a version of [VSL] that includes the keyword \texttt{BLOCK} to start a new scope:
+\begin{figure}[H]
+\begin{verbatim}
+VOID FUNC main() START
+    int a;
+    FLOAT b;
+    ...
+    BLOCK
+        bool b;
+        ... // Position 1
+    END
+
+    BLOCK
+        int b;
+        FLOAT c;
+        ...
+        BLOCK
+            BOOL a;
+            INT c;
+            ... // Position 2
+        END
+    END
+END
+\end{verbatim}
+\end{figure}
+
+\subsection{a) Show the contents of the symbol tables at position 1 and 2 assuming an implementation using a stack of symbol tables.}
+
+\subsection{b) Show the cnotent of the symbol tables at position 1 and 2 assuming an implementation using a single symbol table.}
+
+\subsection{c) What are the advantages and disadvantages of these approaches?}
+
+\newpage
+\section{Problem 3, Type checking}
+\subsection{a) What is the difference between type synthesis and type inference?}
+
+\subsection{b) Some languages, e.g. FORTRAN, have native support for complex numbers. Draw the widening conversions/hierarchy for the following set of types: \texttt{int}, \texttt{float}, \texttt{double}, \texttt{complex int}, \texttt{complex float}, \texttt{complex double}. State the assumptions you make.}
+
+
+\newpage
+\section{Problem 4, Types, SDDs}
+Consider the following partially completed SDD for type expressions:
+\begin{table}[H]
+\begin{tabular}{ll}
+	\textsc{Production} & \textsc{Semantic Rule} \\ \hline
+	T ::= \textbf{int}	&						\\
+	T ::= \textbf{float}& \\
+	T ::= \textbf{bool} & \\
+	T ::= \textbf{T[num]}& \\
+	T ::= (L) 			& \\
+	L ::= L,T			& \\
+	L ::= T				& \\
+\end{tabular}
+\end{table}
+
+Possible types are the basic types \textbf{int}, \textbf{float}, and \textbf{bool}, arrays of any kind of type, e.g. \textbf{int}[5] or \textbf{float}[5][4] and records (which are collections of one or more types, e.g. \textbf{int}, \textbf{float}, (\textbf{int, bool}[3])).
+
+The purpose of the SDD is to compute the number of bytes that must be allocated to store a value of a given type.
+\begin{itemize}
+	\item \textbf{int} requires 4 bytes, \textbf{float} requires 8 bytes, \textbf{bool} requires 1 byte.
+	\item An array requires the number of bytes a single element, multiplied by the length of the array. For instance, \textbf{int}[5] would require 20 bytes. Similarily, \textbf{int}[5][5] (where the type of the elements is \textbf{int}[5]) would require 100 bytes.
+	\item A record requires the sum of bytes required by its members. That is, (\textbf{int, bool}[5]) would require 9 bytes.
+\end{itemize}
+
+\subsection{Complete the SDD, so that the \textit{size} attribute of T stores the size of the type.}
+
+\subsection{Show annotated parse trees for each of these types:}
+\begin{description}
+	\item[i)] \textbf{int}[4][3][5]
+	\item[ii)] (\textbf{int}, \textbf{float}, (\textbf{bool}, \textbf{int}[4]))
+
+\end{description}
+
+\newpage
+\section{Problem 5, SDDs}
+????
