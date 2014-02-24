@@ -10,7 +10,7 @@ The symbol table is used in the process of translating variable and function nam
 You know, whatever the architecture we are compiling for uses.
 
 Also it's useful during error checking.
-Type checking (did we try and assign a string to an integer variable?), declaration checking (or whatever, that we don't try and declare more than one thing with the same identifier within the same scope or whatever the language's rules are).
+Type checking (did we try and assign a string to an integer variable?), declaration checking (or whatever, that we don't try and declare more than one thing with the same identifier within the same scope or whatever the language's rules are -- name collisions?).
 
 
 \subsubsection{What kind of information is typically stored in a symbol table?}
@@ -42,6 +42,7 @@ Disadvantages:
 
 \newpage
 \setcounter{subsubsection}{0}
+% problem 2
 \section{Problem 2, Symbol tables and blocks}
 Consider the following code in a version of [VSL] that includes the keyword \texttt{BLOCK} to start a new scope:
 \begin{figure}[H]
@@ -70,10 +71,50 @@ END
 \end{figure}
 
 \subsubsection{Show the contents of the symbol tables at position 1 and 2 assuming an implementation using a stack of symbol tables.}
+% so with the stack of symbol tables we'd have one ST per scope?
+So, we create a new symbol table as we enter a block/scope and stop adding stuff to it when we leave the block/scope?
+Is this the same thing as chained symbol tables (Fig 2.36, pg 88 of \textsc{drag on book})?
+Because that is what I am betting on.
 
-\subsubsection{Show the cnotent of the symbol tables at position 1 and 2 assuming an implementation using a single symbol table.}
+\subsubsection{Show the contents of the symbol tables at position 1 and 2 assuming an implementation using a single symbol table.}
+I can just make up the scope names as I go along, right?
+
+\begin{table}[H]
+\begin{tabular}{|c|l|l|}
+	\hline
+	Name	& Type			& Scope \\ \hline
+	main	& function, void& global \\
+	a		& int			& main	\\
+	b		& float			& main	\\
+	b		& bool			& main-0 \\
+	\hline
+\end{tabular}
+\label{tab:2-b-1}
+\caption{The contents of the symbol table at position 2, using a single symbol table.}
+\end{table}
+
+\begin{table}[H]
+\begin{tabular}{|c|l|l|}
+	\hline
+	Name	& Type			& Scope \\ \hline
+	main	& function, void& global \\
+	a		& int			& main	\\
+	b		& float			& main	\\
+	b		& bool			& main-0 \\
+	b		& int			& main-1 \\
+	c		& float			& main-1 \\
+	a		& bool			& main-1-0 \\
+	c		& int			& main-1-0 \\
+	\hline
+\end{tabular}
+\label{tab:2-b-2}
+\caption{The contents of the symbol table at position 2, using a single symbol table.}
+\end{table}
 
 \subsubsection{What are the advantages and disadvantages of these approaches?}
+Well so it's just about the symbol tables then?
+Because I don't think the point is that we should be getting multiple declaration issues or type errors or whatever when using the single symbol table.
+It's the language that supports blocks and scopes, so the single-ST implementation should have to be able to handle it, right?
 
 \newpage
 \setcounter{subsubsection}{0}
