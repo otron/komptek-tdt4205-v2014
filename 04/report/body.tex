@@ -1,14 +1,47 @@
 
 \section{Problem 1, Symbol Tables}
 \subsubsection{What is a symbol table, and why is it needed?}
-yes
-\subsubsection{What kind of information is typically stored in a symbol table?}
-nope
-\subsubsection{Mention and briefly discuss the advantages and disadvantages of three different data structures that can be used to implement symbol tables.}
-ok
+A symbol table is a data structure used by compilers and interpreters that holds the identifiers and relevant information found in the source code of the program.
 
+Variable and function and class names and such are very useful for programmers to tell stuff apart in the code and can also carry some semantic value that aids the programmer in figuring out what the code does.
+However computers don't care what a variable is called, as long as it doesn't confuse it with another variable.
+Once the symbol table is complete, the identifiers can be replaced with more machine friendly values (e.g. references to an entry in the symbol table).
+The symbol table is used in the process of translating variable and function names to addresses and offsets and what not.
+You know, whatever the architecture we are compiling for uses.
+
+Also it's useful during error checking.
+Type checking (did we try and assign a string to an integer variable?), declaration checking (or whatever, that we don't try and declare more than one thing with the same identifier within the same scope or whatever the language's rules are).
+
+
+\subsubsection{What kind of information is typically stored in a symbol table?}
+Its entries contain identifiers (the `names' of variables, classes and functions) found in the source code and information about them (e.g. their type and address).
+Also scopes, if the language supports it.
+
+\subsubsection{Mention and briefly discuss the advantages and disadvantages of three different data structures that can be used to implement symbol tables.}
+\paragraph{Linked list}
+You know, just a regular linked list or an array or whatever.
+The kind where each entry points to the next one and we have to scan the entries sequentially when searching.
+
+Advantages: Easy to implement, O(1) insertion\\
+Disadvantages: O(n) lookup, 
+
+
+\paragraph{Hash table}
+Using the identifier as the key.
+
+Advantages: O(1) everything
+Disadvantages: 
+
+\paragraph{Binary search tree}
+Using the identifier as the key.
+This would allow us to find almost matching identifiers when searching through the tree.
+However we are typically only interested in knowing if a value is already in the symbol table already or not.
+
+Advantages: O(log n) everything, not very difficult to implement
+Disadvantages: 
 
 \newpage
+\setcounter{subsubsection}{0}
 \section{Problem 2, Symbol tables and blocks}
 Consider the following code in a version of [VSL] that includes the keyword \texttt{BLOCK} to start a new scope:
 \begin{figure}[H]
@@ -43,6 +76,7 @@ END
 \subsubsection{What are the advantages and disadvantages of these approaches?}
 
 \newpage
+\setcounter{subsubsection}{0}
 \section{Problem 3, Type checking}
 \subsubsection{What is the difference between type synthesis and type inference?}
 
@@ -50,6 +84,7 @@ END
 
 
 \newpage
+\setcounter{subsubsection}{0}
 \section{Problem 4, Types, SDDs}
 Consider the following partially completed SDD for type expressions:
 \begin{table}[H]
