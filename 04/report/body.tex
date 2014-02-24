@@ -76,8 +76,21 @@ So, we create a new symbol table as we enter a block/scope and stop adding stuff
 Is this the same thing as chained symbol tables (Fig 2.36, pg 88 of \textsc{drag on book})?
 Because that is what I am betting on.
 
+\begin{figure}[H]
+\Tree [.Global\\main:function;void [.main\\a:int\\b:float [.main-0\\b:bool ]  ] ]
+\label{fig:2-a-2}
+\caption{The contents of the symbol table at position 1, using a stack of symbol tables. Shown as a tree.}
+\end{figure}
+
+\begin{figure}[H]
+\Tree [.Global\\main:function;void [.main\\a:int\\b:float [.main-0\\b:bool ] [main-1\\b:int\\c:float [.main-1-0\\a:bool\\c:int ] ] ] ]
+\label{fig:2-a-2}
+\caption{The contents of the symbol table at position 2, using a stack of symbol tables. Shown as a tree.}
+\end{figure}
+
 \subsubsection{Show the contents of the symbol tables at position 1 and 2 assuming an implementation using a single symbol table.}
 I can just make up the scope names as I go along, right?
+I mean what the scopes are called shouldn't matter as long as I get the identifiers right, right?
 
 \begin{table}[H]
 \begin{tabular}{|c|l|l|}
@@ -90,7 +103,7 @@ I can just make up the scope names as I go along, right?
 	\hline
 \end{tabular}
 \label{tab:2-b-1}
-\caption{The contents of the symbol table at position 2, using a single symbol table.}
+\caption{The contents of the symbol table at position 1, using a single symbol table.}
 \end{table}
 
 \begin{table}[H]
@@ -112,9 +125,11 @@ I can just make up the scope names as I go along, right?
 \end{table}
 
 \subsubsection{What are the advantages and disadvantages of these approaches?}
-Well so it's just about the symbol tables then?
-Because I don't think the point is that we should be getting multiple declaration issues or type errors or whatever when using the single symbol table.
-It's the language that supports blocks and scopes, so the single-ST implementation should have to be able to handle it, right?
+Both approaches contain the same information.
+
+Is it something about their implementations and how the stack one is segmented rather than just one huge table?
+Because you could implement the stack approach as a two-tiered hash table (scope as the outside key, identifier as the inside key) which would be equal in performance as the single table.
+Both the identifier and scope are required to get the right entry anyway.
 
 \newpage
 \setcounter{subsubsection}{0}
