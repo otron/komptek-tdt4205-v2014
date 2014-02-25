@@ -44,7 +44,7 @@ Disadvantages: O(n) lookup,
 Using the identifier as the key.
 
 Advantages: O(1) everything\\
-Disadvantages: 
+Disadvantages: people might think you're talking about drugs
 
 \paragraph{Binary search tree}
 
@@ -100,7 +100,7 @@ Because that is what I am betting on.
 %TODO: make a proper tree with tables or whatever. Like in Fig 2.36@pg88
 
 \begin{figure}[H]
-\Tree [.Global\\main:function;void [.main\\a:int\\b:float [.main-0\\b:bool ] [main-1\\b:int\\c:float [.main-1-0\\a:bool\\c:int ] ] ] ]
+\Tree [.Global\\main:function;void [.main\\a:int\\b:float [.main-0\\b:bool ] [.main-1\\b:int\\c:float [main-1-0\\a:bool\\c:int ] ] ] ]
 \label{fig:2-a-2}
 \caption{The contents of the symbol table at position 2, using a stack of symbol tables. Shown as a tree.}
 \end{figure}
@@ -169,6 +169,8 @@ But we would never have to search through all of them because we are only intere
 Also you could implement the stack approach as a two-tiered hash table (scope as the outside key, identifier as the inside key) and have pointers or references or whatever to the parent scope of a scope.
 Worst case would be if there are no adjacent scopes and we have to look through all of them, which is still just $O(n)$ in worst case ($n$ is the number of symbol tables).
 Worst case for the single table would be that we have to look through all of it manually ($O(m)$ ($m$ is the number of symbols in the table)) but I can't think of a situation like that.
+
+If the scope tree for a ``typical'' program written in the language we are working with tends to be balanced, then the stack approach is nice.
 
 Also see what I wrote on a) and b) because there are some words there that are relevant to this question as well.
 Man, \emph{words}.
