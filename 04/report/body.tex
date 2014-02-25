@@ -171,8 +171,25 @@ For example, if \emph{x} is used as an argument to a function that specifies tha
 Actually the type of \emph{x} could be anything, but if it's not \emph{t} then we'll get an error.
 
 \subsubsection{Some languages, e.g. FORTRAN, have native support for complex numbers. Draw the widening conversions/hierarchy for the following set of types: \texttt{int}, \texttt{float}, \texttt{double}, \texttt{complex int}, \texttt{complex float}, \texttt{complex double}. State the assumptions you make.}
+%Check out Fig 6.25 on pg 389 for an example of widening conversion.
+%Casting can be done upwards in the tree without loss of information.
+\begin{figure}[H]
+Assumptions: 
+\begin{itemize}
+	\item The width of \emph{complex t} is twice the width of \emph{t} 
+	\item Names of type \emph{t} can be converted to \emph{complex t} without loss of information by copying the real part and letting the imaginary part be zero.
+	\item Conversions can be done upwards in the tree without loss of information (see \textsc{DB} page 388).
+\end{itemize}
+\end{figure}
 
-Check out Fig 6.25 on pg 389 for an example of widening conversion.
+\begin{figure}[H]
+% oh right there's supposed to be a tree here
+%TODO: make the tree here
+% it's just c double > c float > c int
+% 			double	 >	 float >   int
+\caption{The widening conversions for the set of types presented in the problem text.}
+\label{fig:3-b}
+\end{figure}
 
 \newpage
 \setcounter{subsubsection}{0}
