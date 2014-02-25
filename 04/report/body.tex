@@ -1,4 +1,4 @@
-
+%problem 1
 \section{Problem 1, Symbol Tables}
 \subsubsection{What is a symbol table, and why is it needed?}
 A symbol table is a data structure used by compilers and interpreters that holds the identifiers and relevant information found in the source code of the program.
@@ -11,6 +11,11 @@ You know, whatever the architecture we are compiling for uses.
 
 Also it's useful during error checking.
 Type checking (did we try and assign a string to an integer variable?), declaration checking (or whatever, that we don't try and declare more than one thing with the same identifier within the same scope or whatever the language's rules are -- name collisions?).
+
+Strictly speaking, it is not needed.
+Instead of looking something up in the symbol table we could search through the code.
+Though this is computationally expensive compared to using a hash table to store what we've already found.
+So in the sense that it is computationally wasteful to \emph{not} have a symbol table, I suppose you could say it is needed.
 
 
 \subsubsection{What kind of information is typically stored in a symbol table?}
@@ -81,6 +86,7 @@ Because that is what I am betting on.
 \label{fig:2-a-2}
 \caption{The contents of the symbol table at position 1, using a stack of symbol tables. Shown as a tree.}
 \end{figure}
+%TODO: make a proper tree with tables or whatever. Like in Fig 2.36@pg88
 
 \begin{figure}[H]
 \Tree [.Global\\main:function;void [.main\\a:int\\b:float [.main-0\\b:bool ] [main-1\\b:int\\c:float [.main-1-0\\a:bool\\c:int ] ] ] ]
@@ -92,10 +98,21 @@ Because that is what I am betting on.
 I can just make up the scope names as I go along, right?
 I mean what the scopes are called shouldn't matter as long as I get the identifiers right, right?
 
+Also what is ``a single symbol table''supposed to mean?
+Is the point that we can't have scopes with just a single symbol table?
+I don't know, man. 
+I can't remember either of these two approaches being mentioned in any of the lectures, and I couldn't find anything about them in the slides.
+The book seems to use the stack-based approach, in the sense that a new symbol table is created for each scope.
+If a new symbol table is not created for each scope, we'd just be putting all the names in the same symbol table.
+However the type of symbol table we choose to use shouldn't affect the language.
+So scopes and such should still work, which means we do have to reset the offset and list each name's scope along with its entry in the table.
+
+I don't think I get it.
+
 \begin{table}[H]
 \begin{tabular}{|c|l|l|}
 	\hline
-	Name	& Type			& Scope \\ \hline
+	Identifier & Type			& Scope \\ \hline
 	main	& function, void& global \\
 	a		& int			& main	\\
 	b		& float			& main	\\
@@ -105,11 +122,12 @@ I mean what the scopes are called shouldn't matter as long as I get the identifi
 \label{tab:2-b-1}
 \caption{The contents of the symbol table at position 1, using a single symbol table.}
 \end{table}
+%TODO: add offset to table entries
 
 \begin{table}[H]
 \begin{tabular}{|c|l|l|}
 	\hline
-	Name	& Type			& Scope \\ \hline
+	Identifier& Type			& Scope \\ \hline
 	main	& function, void& global \\
 	a		& int			& main	\\
 	b		& float			& main	\\
@@ -126,21 +144,28 @@ I mean what the scopes are called shouldn't matter as long as I get the identifi
 
 \subsubsection{What are the advantages and disadvantages of these approaches?}
 Both approaches contain the same information.
+I think the stack one looks nicer.
+It'd make for a better illustration because it does a better job of illustrating which scopes are under which.
 
 Is it something about their implementations and how the stack one is segmented rather than just one huge table?
 Because you could implement the stack approach as a two-tiered hash table (scope as the outside key, identifier as the inside key) which would be equal in performance as the single table.
 Both the identifier and scope are required to get the right entry anyway.
 
+Also see what I wrote on a) and b) because there are some words there that are relevant to this question as well.
+
 \newpage
 \setcounter{subsubsection}{0}
+% problem 3
 \section{Problem 3, Type checking}
 \subsubsection{What is the difference between type synthesis and type inference?}
 
 \subsubsection{Some languages, e.g. FORTRAN, have native support for complex numbers. Draw the widening conversions/hierarchy for the following set of types: \texttt{int}, \texttt{float}, \texttt{double}, \texttt{complex int}, \texttt{complex float}, \texttt{complex double}. State the assumptions you make.}
 
+Check out Fig 6.25 on pg 389 for an example of widening conversion.
 
 \newpage
 \setcounter{subsubsection}{0}
+% problem 4
 \section{Problem 4, Types, SDDs}
 Consider the following partially completed SDD for type expressions:
 \begin{table}[H]
@@ -166,6 +191,8 @@ The purpose of the SDD is to compute the number of bytes that must be allocated 
 \end{itemize}
 
 \subsubsection{Complete the SDD, so that the \textit{size} attribute of T stores the size of the type.}
+%p304
+% SDD = Syntax Directed Definition
 
 \subsubsection{Show annotated parse trees for each of these types:}
 \begin{description}
