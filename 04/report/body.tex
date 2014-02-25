@@ -158,6 +158,17 @@ Also see what I wrote on a) and b) because there are some words there that are r
 % problem 3
 \section{Problem 3, Type checking}
 \subsubsection{What is the difference between type synthesis and type inference?}
+Type synthesis and type inference are both forms of type checking\footnote{Type checking is when you check that the type expressions you found in a source program conform to the source language's type system.}.
+
+\emph{Type synthesis} builds/figures out the type of an expression by looking at its subexpressions.
+For example, the type of the name \emph{z} in the expression \texttt{z = x+y} would be whatever the language's type system says that the type of \emph{x} added to the type of \emph{y} should be.
+If \emph{x} and \emph{y} are integers in a language that has no other types than integers, the type of \emph{z} would probably be an integer.
+It's hard to say for sure if we don't know what the language's type system is like.
+Type synthesis requires that names are declared before use.
+
+\emph{Type inference} determines the type of a name from the way it is used.
+For example, if \emph{x} is used as an argument to a function that specifies that its parameter should have type \emph{t} then the type of \emph{x} must be \emph{t}.
+Actually the type of \emph{x} could be anything, but if it's not \emph{t} then we'll get an error.
 
 \subsubsection{Some languages, e.g. FORTRAN, have native support for complex numbers. Draw the widening conversions/hierarchy for the following set of types: \texttt{int}, \texttt{float}, \texttt{double}, \texttt{complex int}, \texttt{complex float}, \texttt{complex double}. State the assumptions you make.}
 
