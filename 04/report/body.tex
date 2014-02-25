@@ -241,6 +241,26 @@ The purpose of the SDD is to compute the number of bytes that must be allocated 
 \subsubsection{Complete the SDD, so that the \textit{size} attribute of T stores the size of the type.}
 %p304
 % SDD = Syntax Directed Definition
+I changed the fourth production to $T\rightarrow T_{1}[\mathbf{num}]$ because that's the kind of notation used in the book.
+It also eliminates the possibility that the rule be misunderstood as $x=x$ or some other tautology.
+A similar change was made to the sixth production.
+\begin{table}[H]
+\centering
+\begin{tabular}{l|l}
+	\hline \hline
+	\textsc{Production} 			& \textsc{Semantic Rule} \\ \hline
+	$T \rightarrow \mathbf{int}$			& $T.size = 4$	\\
+	$T \rightarrow \mathbf{float}$			& $T.size = 8$	\\
+	$T \rightarrow \mathbf{bool}$ 			& $T.size = 1$	\\
+	$T \rightarrow T_{1}\mathbf{[num]}$		& $T.size = T_1.size * \mathbf{num}.lexval$\\
+	$T \rightarrow (L)$ 					& $T.size = L.size$ \\
+	$L \rightarrow L_{1},T$					& $L.size = L_1.size + T.size$	\\
+	$L \rightarrow T$						& $L.size = T.size$	\\
+	\hline
+\end{tabular}
+\label{tab:4-a}
+\caption{The completed SDD.}
+\end{table}
 
 \subsubsection{Show annotated parse trees for each of these types:}
 \begin{description}
