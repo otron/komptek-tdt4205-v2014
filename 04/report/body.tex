@@ -97,13 +97,14 @@ Because that is what I am betting on.
 \label{fig:2-a-2}
 \caption{The contents of the symbol table at position 1, using a stack of symbol tables. Shown as a tree.}
 \end{figure}
-%TODO: make a proper tree with tables or whatever. Like in Fig 2.36@pg88
+%TODO: make a proper tree with tables or whatever. Like in Fig 2.36@pg88. So learn TikZ? Yeah ok.
 
 \begin{figure}[H]
 \Tree [.Global\\main:function;void [.main\\a:int\\b:float [.main-0\\b:bool ] [.main-1\\b:int\\c:float [main-1-0\\a:bool\\c:int ] ] ] ]
 \label{fig:2-a-2}
 \caption{The contents of the symbol table at position 2, using a stack of symbol tables. Shown as a tree.}
 \end{figure}
+%TODO: join these! Make them one! (use subfigures like in the last theory assignment)
 
 \subsubsection{Show the contents of the symbol tables at position 1 and 2 assuming an implementation using a single symbol table.}
 I can just make up the scope names as I go along, right?
@@ -270,6 +271,12 @@ A similar change was made to the sixth production.
 	\item[ii)] (\textbf{int}, \textbf{float}, (\textbf{bool}, \textbf{int}[4]))
 \end{description}
 
+All right, done in the style found in Figure 5.3 and 5.5 on page 308-9 of the \textsc{D???} book.
+%TODO: make this a figure.
+%TODO: make another one for the other thing
+\Tree [.{$T.size = 240$} 
+		[.{$T.size = 48$} ] {D} {$\mathbf{num.}lexval = 5$} {D} ] 
+% yeah you know how to do this, just get it done
 \newpage
 \section{Problem 5, SDDs}
 ????
