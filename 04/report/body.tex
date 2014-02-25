@@ -2,6 +2,7 @@
 \section{Problem 1, Symbol Tables}
 \subsubsection{What is a symbol table, and why is it needed?}
 A symbol table is a data structure used by compilers and interpreters that holds the identifiers and relevant information found in the source code of the program.
+Such as where a symbol is used.
 
 Variable and function and class names and such are very useful for programmers to tell stuff apart in the code and can also carry some semantic value that aids the programmer in figuring out what the code does.
 However computers don't care what a variable is called, as long as it doesn't confuse it with another variable.
@@ -19,11 +20,18 @@ So in the sense that it is computationally wasteful to \emph{not} have a symbol 
 
 
 \subsubsection{What kind of information is typically stored in a symbol table?}
-Its entries contain identifiers (the `names' of variables, classes and functions) found in the source code and information about them (e.g. their type and address).
-Also scopes, if the language supports it.
+Well you know, stuff.
+Like what's listed below or in section 8.3.3 of the handout for this assignment.
+\begin{description}
+	\item[Name] the symbol's identifier
+	\item[Type] the symbol's type
+	\item[Scope] the scope the symbol was declared in
+	\item[References] references to the symbol found in the code
+\end{description}
 
 \subsubsection{Mention and briefly discuss the advantages and disadvantages of three different data structures that can be used to implement symbol tables.}
 \paragraph{Linked list}
+
 You know, just a regular linked list or an array or whatever.
 The kind where each entry points to the next one and we have to scan the entries sequentially when searching.
 
@@ -32,18 +40,21 @@ Disadvantages: O(n) lookup,
 
 
 \paragraph{Hash table}
+
 Using the identifier as the key.
 
-Advantages: O(1) everything
+Advantages: O(1) everything\\
 Disadvantages: 
 
 \paragraph{Binary search tree}
+
 Using the identifier as the key.
 This would allow us to find almost matching identifiers when searching through the tree.
 However we are typically only interested in knowing if a value is already in the symbol table already or not.
+Also it'd probably be a good idea to use a self-balancing tree.
 
-Advantages: O(log n) everything, not very difficult to implement
-Disadvantages: 
+Advantages: O(log n) everything, not very difficult to implement\\
+Disadvantages: only O(log n) everything if it's balanced.
 
 \newpage
 \setcounter{subsubsection}{0}
@@ -109,6 +120,10 @@ So scopes and such should still work, which means we do have to reset the offset
 
 I don't think I get it.
 
+Oh, wait, nevermind.
+It's in the handout!
+The answers, they were all in the handout all along!
+
 \begin{table}[H]
 \begin{tabular}{|c|l|l|}
 	\hline
@@ -122,7 +137,6 @@ I don't think I get it.
 \label{tab:2-b-1}
 \caption{The contents of the symbol table at position 1, using a single symbol table.}
 \end{table}
-%TODO: add offset to table entries
 
 \begin{table}[H]
 \begin{tabular}{|c|l|l|}
@@ -145,13 +159,19 @@ I don't think I get it.
 \subsubsection{What are the advantages and disadvantages of these approaches?}
 Both approaches contain the same information.
 I think the stack one looks nicer.
-It'd make for a better illustration because it does a better job of illustrating which scopes are under which.
+It makes for better illustrations because it better illustrates which scopes are under which.
 
 Is it something about their implementations and how the stack one is segmented rather than just one huge table?
-Because you could implement the stack approach as a two-tiered hash table (scope as the outside key, identifier as the inside key) which would be equal in performance as the single table.
-Both the identifier and scope are required to get the right entry anyway.
+Yeah, that's it.
+With the stack-based approach we might have to search more than one symbol table to find what we are looking for.
+But we would never have to search through all of them because we are only interested in entries in scopes located above the one we are in.
+
+Also you could implement the stack approach as a two-tiered hash table (scope as the outside key, identifier as the inside key) and have pointers or references or whatever to the parent scope of a scope.
+Worst case would be if there are no adjacent scopes and we have to look through all of them, which is still just $O(n)$ in worst case ($n$ is the number of symbol tables).
+Worst case for the single table would be that we have to look through all of it manually ($O(m)$ ($m$ is the number of symbols in the table)) but I can't think of a situation like that.
 
 Also see what I wrote on a) and b) because there are some words there that are relevant to this question as well.
+Man, \emph{words}.
 
 \newpage
 \setcounter{subsubsection}{0}
@@ -226,7 +246,6 @@ The purpose of the SDD is to compute the number of bytes that must be allocated 
 \begin{description}
 	\item[i)] \textbf{int}[4][3][5]
 	\item[ii)] (\textbf{int}, \textbf{float}, (\textbf{bool}, \textbf{int}[4]))
-
 \end{description}
 
 \newpage
