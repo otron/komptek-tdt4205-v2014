@@ -94,7 +94,7 @@ Because that is what I am betting on.
 
 \begin{figure}[H]
 \Tree [.Global\\main:function;void [.main\\a:int\\b:float [.main-0\\b:bool ]  ] ]
-\label{fig:2-a-2}
+\label{fig:2-a-1}
 \caption{The contents of the symbol table at position 1, using a stack of symbol tables. Shown as a tree.}
 \end{figure}
 %TODO: make a proper tree with tables or whatever. Like in Fig 2.36@pg88. So learn TikZ? Yeah ok.
@@ -274,9 +274,60 @@ A similar change was made to the sixth production.
 All right, done in the style found in Figure 5.3 and 5.5 on page 308-9 of the \textsc{D???} book.
 %TODO: make this a figure.
 %TODO: make another one for the other thing
+\begin{figure}[H]
 \Tree [.{$T.size = 240$} 
-		[.{$T.size = 48$} ] {D} {$\mathbf{num.}lexval = 5$} {D} ] 
-% yeah you know how to do this, just get it done
+		[.{$T.size = 48$} 
+			[.{$T.size = 16$}
+				[.{$T.size = 4$} {$\mathbf{int}.size = 4$} ]
+			{[} {$\mathbf{num}.lexval = 3$} {]} ]
+		!\qsetw{1cm} {[} {$\mathbf{num}.lexval = 4$} {]} ] 
+	  !\qsetw{1cm} {[} {$\mathbf{num}.lexval = 5$} {]} ] 
+% !\qsetw{1cm} sets the width of the subtree to 1cm
+% I tried placing it on the first line just after the } of the root node, but that didn't work
+\caption{Annotated parse tree for ``\textbf{int}[4][3][5]''.}
+\label{fig:4-b-i}
+\end{figure}
+
+
+\begin{figure}[H]
+\Tree	[.{$T.size = 29$} {(} %a
+			[.{$L.size = 29$} %b
+				[.{$L.size = 12$} %c
+					[.{$L.size = 4$} [.{$T.size = 4$} {$\mathbf{int}.size = 4$} ] % d, e
+					]
+				{,}
+					[.{$T.size = 8$}
+						[{$\mathbf{float}.size = 8$} ]
+					] %f
+				]
+			{,}
+				[.{$T.size = 17$}  % g
+				{(}
+					[.{$L.size = 17$} % h
+						[.{$L.size = 1$}  %i
+							[.{$T.size = 1$} {$\mathbf{bool}.size = 1$} %j
+							]
+						]
+					{,}
+						[.{$T.size = 16$} %k
+							[.{$T.size = 4$} {$\mathbf{int}.size = 4$} ] %l
+						%!\qsetw{2.5cm}
+						{[}
+						{$\mathbf{num}.lexval = 4$}
+						!\qsetw{2.5cm} %affects children of k
+						{]}
+						] !\qsetw{4.5cm} %affects children of h
+					 ] !\qsetw{2.5cm} %affects children of g %
+				 {)}
+				]  !\qsetw{2.5cm} % affects children of c
+			] !\qsetw{2.5cm} % affects children of a/the root
+		 {)}
+		 ]
+\caption{Annotated parse tree for ``(\textbf{int}, \textbf{float}, (\textbf{bool}, \textbf{int}[4]))''.}
+\label{fig:4-b-ii}
+\end{figure}
+
+% problem 5
 \newpage
 \section{Problem 5, SDDs}
 ????
