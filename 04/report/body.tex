@@ -299,4 +299,124 @@ All right, done in the style found in Figure 5.3 and 5.5 on page 308-9 of the \t
 % problem 5
 \newpage
 \section{Problem 5, SDDs}
-????
+
+As far as I can tell from the specification, the decimal floating points numbers are on the form
+\begin{verbatim}
+\D+.?\D*\*(1|10\^[-+]\D*)
+\end{verbatim}
+(in decimal) or something like that.
+Anyway the tricky part is figuring out the value of the decimal-number before the exponential part, I think.
+Now, I know that the value of a string that's actually a base 10 number can be computed by the following:
+\[ \sum_{i=0}^{i=n-1} 10^{i}*c_{i}.lexval \]
+(this is similar to what how we learned to compute the value of binary numbers in discrete mathematics, remember?)
+\begin{table}[H]
+	\centering
+	\begin{tabular}{l|l}
+	\hline	\hline
+	\textsc{Production}			& \multicolumn{1}{c}{\textsc{Rule}} \\ \hline
+	$Digits\rightarrow D$& $D.pos = 0$ \\ 
+						& $Digits.val = D.val$ \\\hline
+	$D\rightarrow D_1d$	& $d.pos = D.pos$	\\
+						& $D_1.pos = D.pos + 1$ \\
+						& $D.val = D_1.val + 10^{d.pos}*d.val$ \\ \hline
+	$D\rightarrow d$	& $d.pos = D.pos$	\\
+						& $D.val = 10^{d.pos}*d.val$\\
+
+	\hline
+	\end{tabular}	
+	\caption{SDD that can compute the value of a decimal number (without a decimal point).}
+	\label{tab:5-1}
+\end{table}
+
+Now that's all and well but the SDD in Table~\ref{tab:5-1} doesn't work for the numbers to the right of the decimal point.
+Oh no.
+It's okay!
+One solution is to make seperate rules specifically for the Digits to the right of the decimal point.
+It'll pretty much be the same, except that the position counter starts at -1 and the production will be right recursive instead of left recursive.
+
+Now, one could say I'm not allowed to do this because the assignment text specifies that ``[I] \emph{may} use [some specified production] for the non-terminal \texttt[digits]''.
+However it doesn't say I'm not allowed to make other changes to the grammar.
+I figure as long as the solution works it's cool, right?
+Yeah.
+Check out Table~\ref{tab:5-2}.
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{l|l}
+	\hline	\hline
+	\textsc{Production}			& \multicolumn{1}{c}{\textsc{Rule}} \\ \hline
+	$Dixits\rightarrow D'$	& $D'.pos = -1$ \\ 
+							& $Dixits.val = D'.val$ \\ \hline
+	$D'\rightarrow d'D'_1$	& $d'.pos = D'.pos$	\\
+							& $D'_1.pos = D'.pos - 1$ \\
+							& $D'.val = D'_1.val + 10^{d'.pos}*d'.val$ \\ \hline
+	$D'\rightarrow d'$		& $d'.pos = D'.pos$	\\
+							& $D'.val = 10^{d'.pos}*d'.val$\\
+
+	\hline
+	\end{tabular}	
+	\caption{SDD that can compute the value of a decimal number (that's to the right of a decimal point).}
+	\label{tab:5-2}
+\end{table}
+
+Also I am making another change to the grammar.
+Instead of having the whole $Digits~.~Digits_{opt}$ thing I'm making up another rule that'll make this easier for me.
+I am calling it $Decimal$.
+It'll be good, just watch.
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{l|l}
+	\hline	\hline
+	\textsc{Production}						& \multicolumn{1}{c}{\textsc{Rule}} \\ \hline
+	$Decimal\rightarrow Digits~.~Dixits$	& $Decimal.val = Digits.val + Dixits.val$ \\ \hline
+	$Decimal\rightarrow Digits$				& $Decimal.val = Digits.val$ \\ \hline
+	$Decimal\rightarrow .~Dixits$			& $Decimal.val = Dixits.val$ \\
+	\hline
+	\end{tabular}	
+	\caption{SDD for the Decimal production.}
+	\label{tab:5-3}
+\end{table}
+
+So!
+With this $Decimal$ production all that's left is the exponent part.
+Check out Table~\ref{tab:5-4}!
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{l|l}
+	\hline	\hline
+	\textsc{Production}	& \multicolumn{1}{c}{\textsc{Rule}} \\ \hline
+	$Exp\rightarrow ExpIndicator~SignedInt$	& $Exp.val = 10^{SignedInt.val}$ \\	\hline
+	$ExpIndicator\rightarrow e$ & \\
+	$ExpIndicator\rightarrow E$	& \\ \hline
+	$SignedInt\rightarrow Sign Digits$ 		& $SignedInt.val = Sign.val * Digits.val$ \\
+	$SignedInt\rightarrow Digits$			& $SignedInt.val = Digits.val$ \\ \hline
+	$Sign\rightarrow +$						& $Sign.val = 1$ \\
+	$Sign\rightarrow -$						& $Sign.val = -1$ \\ 
+	\hline
+	\end{tabular}	
+	\caption{SDD for the exponent part of the problem.}
+	\label{tab:5-4}
+\end{table}
+
+You know I am glad we are almost done.
+I swear, sometimes I forget if this is a compilers or \LaTeX~class.
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{l|l}
+	\hline	\hline
+	\textsc{Production}	& \multicolumn{1}{c}{\textsc{Rule}} \\ \hline
+	$DecimalFPL\rightarrow Decimal~Exp~FTS$ & $DecimalFPL.val = Decimal.val * Exp.val$ \\
+	$DecimalFPL\rightarrow Decimal~Exp$		& $DecimalFPL.val = Decimal.val * Exp.val$ \\
+	$DecimalFPL\rightarrow Decimal~FTS$		& $DecimalFPL.val = Decimal.val$ \\
+	\hline
+	\end{tabular}	
+	\caption{SDD for the remainder of the problem.}
+	\label{tab:5-5}
+\end{table}
+
+And there you have it.
+Put it all together and it should work.
+I hope y'alls not mad I made all these changes.
