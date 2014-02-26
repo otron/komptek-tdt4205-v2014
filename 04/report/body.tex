@@ -60,31 +60,6 @@ Disadvantages: only O(log n) everything if it's balanced.
 \setcounter{subsubsection}{0}
 % problem 2
 \section{Problem 2, Symbol tables and blocks}
-Consider the following code in a version of [VSL] that includes the keyword \texttt{BLOCK} to start a new scope:
-\begin{figure}[H]
-\begin{verbatim}
-VOID FUNC main() START
-    int a;
-    FLOAT b;
-    ...
-    BLOCK
-        bool b;
-        ... // Position 1
-    END
-
-    BLOCK
-        int b;
-        FLOAT c;
-        ...
-        BLOCK
-            BOOL a;
-            INT c;
-            ... // Position 2
-        END
-    END
-END
-\end{verbatim}
-\end{figure}
 
 \subsubsection{Show the contents of the symbol tables at position 1 and 2 assuming an implementation using a stack of symbol tables.}
 % so with the stack of symbol tables we'd have one ST per scope?
@@ -220,33 +195,12 @@ Assumptions:
 \caption{The widening conversions for the set of types presented in the problem text.}
 \label{fig:3-b}
 \end{figure}
+Pardon the poor illustration, it's not in the style found in the dragon book but it should suffice.
 
 \newpage
 \setcounter{subsubsection}{0}
 % problem 4
 \section{Problem 4, Types, SDDs}
-Consider the following partially completed SDD for type expressions:
-\begin{table}[H]
-\begin{tabular}{ll}
-	\textsc{Production} & \textsc{Semantic Rule} \\ \hline
-	T ::= \textbf{int}	&						\\
-	T ::= \textbf{float}& \\
-	T ::= \textbf{bool} & \\
-	T ::= \textbf{T[num]}& \\
-	T ::= (L) 			& \\
-	L ::= L,T			& \\
-	L ::= T				& \\
-\end{tabular}
-\end{table}
-
-Possible types are the basic types \textbf{int}, \textbf{float}, and \textbf{bool}, arrays of any kind of type, e.g. \textbf{int}[5] or \textbf{float}[5][4] and records (which are collections of one or more types, e.g. \textbf{int}, \textbf{float}, (\textbf{int, bool}[3])).
-
-The purpose of the SDD is to compute the number of bytes that must be allocated to store a value of a given type.
-\begin{itemize}
-	\item \textbf{int} requires 4 bytes, \textbf{float} requires 8 bytes, \textbf{bool} requires 1 byte.
-	\item An array requires the number of bytes a single element, multiplied by the length of the array. For instance, \textbf{int}[5] would require 20 bytes. Similarily, \textbf{int}[5][5] (where the type of the elements is \textbf{int}[5]) would require 100 bytes.
-	\item A record requires the sum of bytes required by its members. That is, (\textbf{int, bool}[5]) would require 9 bytes.
-\end{itemize}
 
 \subsubsection{Complete the SDD, so that the \textit{size} attribute of T stores the size of the type.}
 %p304
