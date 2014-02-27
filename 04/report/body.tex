@@ -288,7 +288,7 @@ It's okay!
 One solution is to make seperate rules specifically for the Digits to the right of the decimal point.
 It'll pretty much be the same, except that the position counter starts at -1 and the production will be right recursive instead of left recursive.
 
-Now, one could say I'm not allowed to do this because the assignment text specifies that ``[I] \emph{may} use [some specified production] for the non-terminal \texttt[digits]''.
+Now, one could say I'm not allowed to do this because the assignment text specifies that ``[I] \emph{may} use [some specified production] for the non-terminal \texttt{digits}''.
 However it doesn't say I'm not allowed to make other changes to the grammar.
 I figure as long as the solution works it's cool, right?
 Yeah.
@@ -342,11 +342,11 @@ Check out Table~\ref{tab:5-4}!
 	\hline	\hline
 	\textsc{Production}	& \multicolumn{1}{c}{\textsc{Rule}} \\ \hline
 	$Exp\rightarrow ExpIndicator~SignedInt$	& $Exp.val = 10^{SignedInt.val}$ \\	\hline
-	$ExpIndicator\rightarrow e$ & \\
+	$ExpIndicator\rightarrow e$ & \\ \hline
 	$ExpIndicator\rightarrow E$	& \\ \hline
-	$SignedInt\rightarrow Sign Digits$ 		& $SignedInt.val = Sign.val * Digits.val$ \\
+	$SignedInt\rightarrow Sign~Digits$ 		& $SignedInt.val = Sign.val * Digits.val$ \\ \hline
 	$SignedInt\rightarrow Digits$			& $SignedInt.val = Digits.val$ \\ \hline
-	$Sign\rightarrow +$						& $Sign.val = 1$ \\
+	$Sign\rightarrow +$						& $Sign.val = 1$ \\ \hline
 	$Sign\rightarrow -$						& $Sign.val = -1$ \\ 
 	\hline
 	\end{tabular}	
@@ -362,9 +362,9 @@ I swear, sometimes I forget if this is a compilers or \LaTeX~class.
 	\begin{tabular}{l|l}
 	\hline	\hline
 	\textsc{Production}	& \multicolumn{1}{c}{\textsc{Rule}} \\ \hline
-	$DecimalFPL\rightarrow Decimal~Exp~FTS$ & $DecimalFPL.val = Decimal.val * Exp.val$ \\
-	$DecimalFPL\rightarrow Decimal~Exp$		& $DecimalFPL.val = Decimal.val * Exp.val$ \\
-	$DecimalFPL\rightarrow Decimal~FTS$		& $DecimalFPL.val = Decimal.val$ \\
+	$DecimalFPL\rightarrow Decimal~Exp~FTS$ & $DecimalFPL.val = Decimal.val * Exp.val$ \\ \hline
+	$DecimalFPL\rightarrow Decimal~Exp$		& $DecimalFPL.val = Decimal.val * Exp.val$ \\ \hline
+	$DecimalFPL\rightarrow Decimal~FTS$		& $DecimalFPL.val = Decimal.val$ \\ 
 	\hline
 	\end{tabular}	
 	\caption{SDD for the remainder of the problem.}
