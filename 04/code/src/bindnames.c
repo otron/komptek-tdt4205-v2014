@@ -90,26 +90,32 @@ int bind_constant ( node_t *root, int stackOffset)
 
 symbol_t* create_symbol(node_t* declaration_node, int stackOffset)
 {
-
+	symbol_t* st_entry;
+	st_entry->stack_offset = stackOffset;
+	st_entry->label = declaration_node->label;
+	st_entry->type = declaration_node->data_type;
+	return st_entry;
 }
 
 int bind_declaration ( node_t *root, int stackOffset)
 {
-	visit_children(root, stackOffset);
+	// So, create the symbol table entry for this declaration?
+	// According to the recitation slides, root is a variable
+	symbol_t* st_entry = create_symbol(root, stackOffset);
+	symbol_insert(st_entry->label, st_entry);
 
 	if(outputStage == 6)
 		fprintf(stderr, "DECLARATION: parameter/variable : '%s', offset: %d\n", root->label, stackOffset);
 
+	visit_children(root, stackOffset);
 }
 
 int bind_variable ( node_t *root, int stackOffset)
 {
+	// ooh so this is where we go when a variable is used
+	// so we should get the symbol table entry
 	visit_children(root, stackOffset);
 	// root is a variable node (nodetype_t = variable_n)
-	symbol_t* st_entry;
-	st_entry->stack_offset = stackOffset;
-	st_entry->label = root->label;
-	st_entry->type = 
 
 
 	if(outputStage == 6)
