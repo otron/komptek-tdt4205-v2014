@@ -70,6 +70,18 @@ function_symbol_t* create_function_symbol(node_t* function_node)
 
 int bind_function_list ( node_t *root, int stackOffset)
 {
+	// this is the one where we have to put all the children in the symbol table before we do anything funky (else)
+
+	if (root->children != NULL) {
+		for (int i = 0; i < root->n_children; i++) {
+			// create a ST entry for the child
+			function_symbol_t* fst = create_function_symbol(root->children[i]);
+			//symbol_insert
+
+		}
+
+	}
+
 	visit_children(root, stackOffset);
 	if(outputStage == 6)
 		fprintf ( stderr, "FUNCTION_LIST: Start\n");
@@ -90,19 +102,23 @@ int bind_constant ( node_t *root, int stackOffset)
 
 symbol_t* create_symbol(node_t* declaration_node, int stackOffset)
 {
-	symbol_t* st_entry;
-	st_entry->stack_offset = stackOffset;
-	st_entry->label = declaration_node->label;
-	st_entry->type = declaration_node->data_type;
-	return st_entry;
+	// create a symbol table entry!
+	// don't try creating an empty symbol_t* and filling out its fields because it'll segfault! 
+	symbol_t st_entry;
+	st_entry.stack_offset = stackOffset;
+	st_entry.label = declaration_node->label;
+	st_entry.type = declaration_node->data_type;
+	return &st_entry;
 }
 
 int bind_declaration ( node_t *root, int stackOffset)
 {
+	if (root == NULL)
+		return; // I mean, can you ever be too safe when dealing with potential segfaults?
 	// So, create the symbol table entry for this declaration?
 	// According to the recitation slides, root is a variable
 	symbol_t* st_entry = create_symbol(root, stackOffset);
-	symbol_insert(st_entry->label, st_entry);
+	//symbol_insert(st_entry->label, st_entry);
 
 	if(outputStage == 6)
 		fprintf(stderr, "DECLARATION: parameter/variable : '%s', offset: %d\n", root->label, stackOffset);
@@ -112,8 +128,12 @@ int bind_declaration ( node_t *root, int stackOffset)
 
 int bind_variable ( node_t *root, int stackOffset)
 {
+	if (root == NULL)
+		return;
 	// ooh so this is where we go when a variable is used
 	// so we should get the symbol table entry
+	// and bind it to root->entry, right?
+	//root->entry = symbol_get(root->label);
 	visit_children(root, stackOffset);
 	// root is a variable node (nodetype_t = variable_n)
 
