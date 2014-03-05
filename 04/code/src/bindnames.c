@@ -305,6 +305,31 @@ int bind_expression( node_t* root, int stackOffset)
 	//root->function_entry = function_get(root->label);
 	// nope, causes segfaults.
 
+	char* label = root->label;
+	if (label == NULL) {
+		visit_children(root, stackOffset);
+		return;
+		// idk if this is the desired behaviour but that's what we're doing.
+		// because then we don't have to put the rest of this function
+		// inside an if-statement
+	}
+
+	// function stuff
+	function_symbol_t* fun_entry = function_get(label);
+	// no, I don't think this will work.
+	// root is an expression node, yeah?
+	// I've no idea what its structure is like.
+	// but I don't think it's this easy
+	// because then idk how we would do class usage
+	// I'm not even sure what I should be looking for here
+	// its structure is all kinds of different
+	if (fun_entry != NULL) {
+		// do the function stuff
+		//root->function_entry = fun_entry;
+	}
+	// variable stuff? No, that's taken care of in bind_variable it seems
+
+	// class stuff!
 
 	visit_children(root, stackOffset);
 	if(outputStage == 6)
