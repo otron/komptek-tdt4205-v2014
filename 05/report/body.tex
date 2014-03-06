@@ -1,7 +1,49 @@
 % problem 1
 \section{Type checking}
 \begin{quote}
-Mention additional typechecking which could be done in addition to what we have implemented in the code part of this and the previous assignment.
+\emph{Mention additional typechecking which could be done in addition to what we have implemented in the code part of this}
+	[PS5]
+\emph{and the previous assignment}
+	[PS4].
 \end{quote}
 
-Also do the dance. You know which one.
+You guys are really stepping the game up with this theory assignment, having us look for the answers in the recitation slides and handout for the code part instead of the book or physical handouts.
+
+So type checking entails is pretty much whatever the language in question defines it to entail through its type system.
+
+In PS4 we checked that the types of the operands and result (or the type of the variable we wanted to store the result in anyway) for various expressions could be found in the table the recitation slides.
+
+In PS5 we check that the number of arguments (and their types) match the function declaration for function and method calls, and that the type of the LHS and RHS of an expression match.
+
+We could also check that we don't try and declare a variable with an invalid type, e.g. \texttt{VOID} (like what's done in \texttt{err\_addingVoid.vsl}).
+Apparently there's also something going on in \texttt{err\_callFunc.vsl}, though I am not entirely sure \emph{what}.
+Is it that \texttt{VOID} an invalid type to use in statements like \texttt{PRINT}?
+Because the VSL grammar seems to allow it, so I don't know.
+
+% problem 2
+\newpage
+\section{Assembly programming}
+\begin{table}[H]
+\centering
+	\begin{tabular}{|r|r||c|}
+	% notes & name & value/what
+	\hline
+	Notes	& & Stack \\ \hline
+			& a: & 		\\ \hline		
+			& b: & 5	\\ \hline
+	Params	& a: & 5	\\ \hline	
+			& &Return Address  \\ \hline
+			& &FP$_{main}$ \\ \hline
+	Local	& b: & 5	\\ \hline
+			& c: & 5.5	\\ \hline
+			& d: & 4.5	\\ \hline
+	Params	& a: & 5	\\ \hline
+			& b: & 5.5	\\ \hline
+			& c: & 4.5	\\ \hline
+			& &Return Address \\ \hline
+	FP$\rightarrow$& &FP$_f$ 	\\ \hline
+	Local	& b: & 5	\\ \hline
+	SP$\rightarrow$	& d: & 5.5	\\ \hline
+	\end{tabular}
+\end{table}
+
