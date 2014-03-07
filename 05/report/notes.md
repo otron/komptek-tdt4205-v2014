@@ -96,3 +96,28 @@ that was not so hard. I can just mechanically follow that!
 # Problem 3
 This is the ARM assembly code generation one
 this is also the last thing I will work on in this theory assignment.
+I think this is only covered in the recitation 5 slides
+Perhaps some control flow stuff is covered in the book or what not
+wait, what do I actually need to do here?
+
+Each function gets a label.
+variables are assigned to a register
+
+PUSH { rN } stores the contents of rN at the top of the stack
+POP { rN } removes the content from the top of the stack and puts it in rN
+
+can we reference the parameters of a function with LDR rN, [fp+offset]?
+ok so when we call a function this happens:
+BEFORE THE ACTUAL FUNCTION CALL
+registers are saved on the stack
+parameters are pushed onto the stack
+	"the parameters" are the arguments given to the function that is being called
+the return address is saved in link register -- WHAT DOES THIS MEAN?
+jump to function address
+	jmp %FUNCTIONLABEL%
+store link register on stack
+store fp on stack
+	PUSH { fp }
+set fp to top of stack
+	MOV sp, fp ; places value in sp in fp
+
