@@ -18,9 +18,48 @@ void type_error(node_t* root){
 	exit(-1);
 }
 
-int equal_types(data_type_t a, data_type_t b)
-{
+int equal_types(data_type_t a, data_type_t b) {
+	// morelike equal rites
+	// am i rite or what
+	// yeah my man rincewind knows what's up
+	// wait, the rules for type equality in VSL aren't specified anywhere
+	// at least not in the recitation slides
+	// ... what?
 
+	if (a.base_type != b.base_type) {
+		return FALSE;
+	}
+	// so from here on we can assume that a.base_type == b.base_type 
+
+	//same class?
+	if (a.base_type == CLASS_TYPE) {
+		//compare class_names
+		if (strcmp(a.class_name, b.class_name) == 0) {
+			return TRUE;
+		}
+		return FALSE;
+	}
+
+	// arrays?
+	if (a.base_type == ARRAY_TYPE) {
+		if (a.array_type != b.array_type)
+			return FALSE;
+		if (a.n_dimensions != b.n_dimensions)
+			return FALSE;
+		// if we get here they have the same number of dimensions
+		for (int i = 0; i < a.n_dimensions; i++) {
+			if (a.dimensions[i] != b.dimensions[i])
+				return FALSE;
+		}
+		// well okay they check out
+		return TRUE;
+	}
+
+	// so if we get here they're not arrays or some class
+	// which means they should be equal as long as the base type
+	// is the same, right?
+	return TRUE;
+	// let's hope so
 }
 
 data_type_t typecheck_default(node_t* root)
