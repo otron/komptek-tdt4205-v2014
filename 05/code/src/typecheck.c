@@ -75,8 +75,38 @@ data_type_t typecheck_expression(node_t* root)
 		fprintf( stderr, "Type checking expression %s\n", root->expression_type.text);
 
 	toReturn = te(root);
+	// this was here when I got here
 	
 	//Insert additional checking here
+	// and by "here" you mean below "here", right?
+	// All right, that's cool.
+	// so, expressions!
+	// we should check that the number of arguments (and their types) matches the function declaration for function and method calls
+
+	// so I gotta find out if root represents a function or method call
+	// root->expression_type.index == METH_CALL_E || FUNC_CALL_E ?
+
+	if (root->nodetype.index != EXPRESSION) {
+		// what are we even doing here
+	}
+
+	// assume root->nodetype == expression_n
+
+	if (root->expression_type.index != METH_CALL_E ||
+			root->expression_type.index != FUNC_CALL_E) {
+		// we should break here I think
+	}
+
+	function_symbol_t* fst = (function_symbol_t*) malloc(sizeof(function_symbol_t));
+
+	if (root->expression_type.index == FUNC_CALL_E) {
+		// step 1: find its symbol table entry
+		//if (root->label != NULL) // why would the label be null for a function call?
+			fst = function_get(root->label);
+
+
+	}
+
 	
 }
 
