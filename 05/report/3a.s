@@ -17,8 +17,7 @@ func_f:
 	mov r0, r0			; store return value in r0
 	mov sp, fp			; set stack pointer to value in fp
 	pop {fp}			; load old FP into fp register
-	pop {lr}			; load return address into link register
-	mov pc, lr			; set program counter to address in lr
+	pop {pc}			; load return address into program counter
 
 func_g:
 	push {lr}			; push link register onto stack
@@ -29,5 +28,4 @@ func_g:
 	mov r0, r2			; store the return value in r0
 	mov sp, fp			; set sp to value in fp (FP2)
 	pop {fp}			; load old FP (FP1) into fp
-	pop {lr}			; load return address into link register
-	mov pc, lr			; pc := lr # set program counter to address in lr
+	pop {pc}			; pop return address into program counter, returning to wherever.

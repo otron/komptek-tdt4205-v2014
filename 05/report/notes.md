@@ -121,3 +121,10 @@ store fp on stack
 set fp to top of stack
 	MOV sp, fp ; places value in sp in fp
 
+The updated recitation 5 slides contained an example, which was pretty nice.
+It cleared some stuff up.
+I am not sure if '... aaaand I just found a mistake in my answer to problem 3:
+I return by doing pop { lr }, mov pc, lr
+but in the example they just do pop {pc} which should result in the exact same thing except that we don't mess with the link register
+I don't know if it's automatically updated or if it just stores the PC from the last time we did a jump
+
