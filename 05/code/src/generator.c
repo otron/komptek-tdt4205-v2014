@@ -117,6 +117,15 @@ void gen_PROGRAM ( node_t *root, int scopedepth)
 	
 
 	/* TODO: Insert a call to the first defined function here */
+	// how do I find the first defined function?
+	// is it the first function_statement node of root?
+	// hmm it might be
+	// because the PROGRAM node is going to look like one of the following:
+	// [program, [function_list]]
+	// [program, [class_list], [function_list]]
+	// so we just iterate through its children
+	// find the function_list and insert a call to the first child of the function_list
+	// yeah, that sounds about right
 
 
 	tracePrint("End PROGRAM\n");
@@ -292,6 +301,7 @@ void gen_RETURN_STATEMENT ( node_t *root, int scopedepth )
 	
 	tracePrint ( "Starting RETURN_STATEMENT\n");
 	
+	// so my code goes here, then? ok. Let's try that
 	
 	tracePrint ( "End RETURN_STATEMENT\n");
 }

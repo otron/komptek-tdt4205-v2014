@@ -215,4 +215,18 @@ data_type_t typecheck_assignment(node_t* root) {
 		LHS_type = LHS->children[LHS->n_children - 1]->data_type;
 	}
 
+	// step 2: find the type of RHS
+	// case 1: RHS is a VARIABLE
+	if (RHS->nodetype.index == VARIABLE) {
+		RHS_type = RHS->data_type;
+	}
+	// case 2: RHS is an expression
+	if (RHS->nodetype.index == EXPRESSION) {
+		RHS_type = typecheck_expression(RHS);
+	}
+
+	if (equal_types(RHS_type, LHS_type) == TRUE) {
+		return RHS_type;
+	}
+	type_error(root);
 }
