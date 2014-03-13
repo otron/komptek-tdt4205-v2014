@@ -106,7 +106,7 @@ data_type_t typecheck_expression(node_t* root)
 
 	// count the number of argument child nodes root has
 	int child_count = 0;
-	node_t* expr_list;
+	node_t* expr_list; // store the expression_list for later
 	for (int i = 0; i < root->n_children; i++) {
 		expr_list = root->children[i];
 		if (expr_list->nodetype.index = EXPRESSION_LIST) {
@@ -160,11 +160,17 @@ data_type_t typecheck_expression(node_t* root)
 	// to the types of the children of expr_list
 	// we can use equal_types(...) for this!
 	// just throw type_error() if equal_types(...) doesn't return TRUE/1!
-
-
-
+	
+	// at this point fst->nArguments == child_count == expr_list->n_children
+	for (int i = 0; i < fst->nArguments; i++) {
+		// compare fst->argument_types[i] and expr_list->children[i]->data_type
+		int equal = equal_types(fst->argument_types[i], expr_list->children[i]->data_type);
+		if (equal == FALSE)
+			type_error(root);
+	}
 
 	//need to return the function or method's return type
+	return fst->return_type;
 }
 
 data_type_t typecheck_variable(node_t* root){
