@@ -88,6 +88,7 @@ data_type_t typecheck_expression(node_t* root)
 
 	if (root->nodetype.index != EXPRESSION) {
 		// what are we even doing here
+		type_error(root);
 	}
 
 	// assume root->nodetype == expression_n
@@ -95,19 +96,75 @@ data_type_t typecheck_expression(node_t* root)
 	if (root->expression_type.index != METH_CALL_E ||
 			root->expression_type.index != FUNC_CALL_E) {
 		// we should break here I think
+		type_error(root);
 	}
+
+	if (root->label == NULL)
+		type_error(root);
 
 	function_symbol_t* fst = (function_symbol_t*) malloc(sizeof(function_symbol_t));
 
-	if (root->expression_type.index == FUNC_CALL_E) {
-		// step 1: find its symbol table entry
-		//if (root->label != NULL) // why would the label be null for a function call?
-			fst = function_get(root->label);
-
-
+	// count the number of argument child nodes root has
+	int child_count = 0;
+	node_t* expr_list;
+	for (int i = 0; i < root->n_children; i++) {
+		expr_list = root->children[i];
+		if (expr_list->nodetype.index = EXPRESSION_LIST) {
+			child_count = expr_list->n_children;
+			break;
+		}
 	}
 
+	if (root->expression_type.index == FUNC_CALL_E) {
+		// step 1: find its symbol table entry
+		fst = function_get(root->label);
+	}
+
+	if (root->expression_type.index == METH_CALL_E) {
+		// step 1: find the class name
+		char* className;
+
+		// step 2: look at the first child
+		node_t* firstChild = root->children[0];
+
+		if (firstChild->nodetype.index = VARIABLE) {
+			//case 1, no nested class. e.g. class.method()
+			// class name == label of first child
+			className = firstChild->label;
+		}
+		else if (firstChild->nodetype.index == EXPRESSION &&
+				firstChild->expression_type.index == CLASS_FIELD_E) {
+			// case 2: nested class(es).
+			// class name (where the method was declared)
+			// is the last VARIABLE node in firstChild.
+			className = firstChild->children[firstChild->n_children - 1]->label;
+
+		}
+		else { //case 3: error
+			type_error(root);
+		}
+		// step 2: get the ST entry
+		fst = class_get_method(className, root->label);
+	}
+
+	if (fst == NULL)
+		type_error(root);
+	// if we don't do that here then we're just going to get segfaults down the road
+	// and I do not want that
+
+	// step 2: uh, compare child_count with fst's no. parameters
+	if (fst->nArguments != child_count)
+		type_error(root); // argument count mismatch
 	
+	// step 3: compare the types of fst's (the declaration's) parameters
+	// to the types of the children of expr_list
+	// we can use equal_types(...) for this!
+	// just throw type_error() if equal_types(...) doesn't return TRUE/1!
+
+
+
+
+	//need to return the function or method's return type
 }
 
 data_type_t typecheck_variable(node_t* root){
