@@ -96,7 +96,15 @@ data_type_t typecheck_expression(node_t* root)
 	if (root->expression_type.index != METH_CALL_E ||
 			root->expression_type.index != FUNC_CALL_E) {
 		// we should break here I think
-		type_error(root);
+		// wait could we just return toReturn here?
+		// shit, why isn't te(node_t) documented anywhere
+		return toReturn;
+		//type_error(root);
+		// or should the code for handling other kinds of expressions be here?
+		// I have no idea.
+		// I am going to assume that, at this point, toReturn is the type of root
+		// if root is not a function or method
+		// that is, I'm assuming that te(root) does something magic that isn't written down anywhere
 	}
 
 	if (root->label == NULL)
@@ -169,15 +177,42 @@ data_type_t typecheck_expression(node_t* root)
 			type_error(root);
 	}
 
+	toReturn = fst->return_type;
 	//need to return the function or method's return type
-	return fst->return_type;
+	return toReturn;
 }
 
 data_type_t typecheck_variable(node_t* root){
 	return tv(root);
 }
 
-data_type_t typecheck_assignment(node_t* root)
-{
+data_type_t typecheck_assignment(node_t* root) {
+	// so, uh, we just gotta check if the type of the LHS matches with the type of the RHS?
+	// equal_types(typeof(LHS), typeof(RHS)) == TRUE ?
+	// and something about Class_field_access expressions
+
+	// check root's type, it should be ASSIGNMENT_STATEMENT
+	if (root->nodetype.index != ASSIGNMENT_STATEMENT) {
+		type_error(root);
+		// what are we even doing here?
+	}
+	// nodetype of root is ASSIGNMENT_STATEMENT
+	data_type_t LHS_type, RHS_type;
+	node_t* LHS = root->children[0];
+	node_t* RHS = root->children[1];
+	// step 1: find the type of LHS
+
+	// there's two possibilities:
+	// case 1: LHS->nodetype == VARIABLE
+	// case 2: LHS->nodetype == CLASS_FIELD_E
+	// for case 2 then LHS_type should be equal to the type of the last child of LHS
+
+	if (LHS->nodetype.index == VARIABLE) {
+		LHS_type = LHS->data_type;
+	}
+	else if (LHS->nodetype.index == CLASS_FIELD_E) {
+		// case 2
+		LHS_type = LHS->children[LHS->n_children - 1]->data_type;
+	}
 
 }
