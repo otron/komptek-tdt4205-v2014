@@ -126,6 +126,21 @@ void gen_PROGRAM ( node_t *root, int scopedepth)
 	// so we just iterate through its children
 	// find the function_list and insert a call to the first child of the function_list
 	// yeah, that sounds about right
+	node_t* firstFunc;
+	for (int i = 0; i < root->n_children; i++) {
+		if (root->children[i]->nodetype.index = FUNCTION_LIST) {
+			firstFunc = root->children[i]->children[0];
+			break;
+		}
+	}
+	// cool this doesn't segfault
+	// so now we gotta insert a "call to the first function"
+	// which I guess means we gotta add a jump instruction to _firstFunc->label
+	// or will just label (without the underscore) suffice?
+
+	// oh, am I supposed to use the CALL opcode here?
+	instruction_add(CALL, STRDUP(firstFunc->label), NULL, 0, 0);
+	// well it doesn't segfault
 
 
 	tracePrint("End PROGRAM\n");
@@ -145,6 +160,33 @@ void gen_FUNCTION ( node_t *root, int scopedepth )
 
     tracePrint ( "Starting FUNCTION (%s) with depth %d\n", root->label, scopedepth);
     
+	if (root->nodetype.index != FUNCTION) {
+		// ????
+	}
+	// step 1: make dat label
+	instruction_add(LABEL, STRDUP(root->label), NULL, 0, 0);
+
+	// step 2: set up the stack frame
+	// remember yo training, james
+	// save link register on stack
+	// waiit didn't I do this in the theory part?
+	// so can't I just copy what I did there?
+	// yay!
+
+	// push link register onto stack
+	instruction_add(PUSH, lr, NULL, 0, 0);
+	// push fp onto stack
+	instruction_add(PUSH, fp, NULL, 0, 0);
+	// set fp to sp
+	instruction_add(MOVE, fp, sp, 0, 0);
+
+	// load parameters?
+	// oh no we don't have to, we should just generate code for the function body
+	// and by that I think they want us to traverse the tree
+	for (int i = 0; i < root->n_children; i++) {
+		if (root->children[i] != NULL)
+			root->children[i]->generate(root->children[i], scopedepth);	
+	}
     
 
 
