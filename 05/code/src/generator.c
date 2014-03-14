@@ -157,6 +157,7 @@ void gen_PROGRAM ( node_t *root, int scopedepth)
 void gen_FUNCTION ( node_t *root, int scopedepth )
 {
 
+	// hmm, do I have to increase the scope here?
 
     tracePrint ( "Starting FUNCTION (%s) with depth %d\n", root->label, scopedepth);
     
@@ -183,11 +184,30 @@ void gen_FUNCTION ( node_t *root, int scopedepth )
 	// load parameters?
 	// oh no we don't have to, we should just generate code for the function body
 	// and by that I think they want us to traverse the tree
+	// this is step 3 (execute function)
 	for (int i = 0; i < root->n_children; i++) {
 		if (root->children[i] != NULL)
 			root->children[i]->generate(root->children[i], scopedepth);	
 	}
     
+
+	// step 4
+	// set sp to old fp
+	instruction_add(MOVE, sp, fp, 0, 0);
+	// restore old fp
+	instruction_add(POP, fp, NULL, 0, 0);
+	// store result/return value in r0
+	// wait, can't we just do this in the return statement?
+	// yeah let's just assume the return statement generator thing does this
+	// pop return address into pc (jump back to caller)
+	// oh what, I'm not allowed to make changes to the program counter directly with this framework?
+	// WELL FINE
+	// pop return address
+	instruction_add(POP, lr, NULL, 0, 0);
+	// jump? idk if bl accepts registers. The recitation slides say bl works with labels
+	instruction_add(JUMP, lr, NULL, 0, 0);
+
+	// and that's it
 
 
 	//Leaving the scope, decreasing depth
@@ -344,6 +364,7 @@ void gen_RETURN_STATEMENT ( node_t *root, int scopedepth )
 	tracePrint ( "Starting RETURN_STATEMENT\n");
 	
 	// so my code goes here, then? ok. Let's try that
+	// just gotta store the value returned by the expression in r0
 	
 	tracePrint ( "End RETURN_STATEMENT\n");
 }
