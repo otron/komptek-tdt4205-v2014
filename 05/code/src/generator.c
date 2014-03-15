@@ -229,6 +229,8 @@ void gen_DECLARATION_STATEMENT (node_t *root, int scopedepth)
 	instruction_add(PUSH, r0, NULL, 0, 0);
 	//(because VSL doesn't make any guarantees about the value of un-initialized variables
 	//or so the recitation slides say)
+	// it should work like this because parameters are visited before 
+	// local variables in the traversal, so stuff will end up in the right place by itself
 
 
 	tracePrint("Ending DECLARATION\n");
@@ -313,6 +315,23 @@ void gen_EXPRESSION ( node_t *root, int scopedepth )
 	switch(root->expression_type.index){
 
 		case FUNC_CALL_E:
+			node_t* expr_list;
+			// check if there's an expression list amongst the children
+			for (int i = 0; i < root->n_children; i++) {
+				if (root->children[i]->nodetype.index == EXPRESSION_LIST) {
+					expr_list = root->children[i];
+					break;
+				}
+			}
+			if (expr_list != NULL) {
+				// we've got arguments
+				// local variables are taken care of by declaration statements
+				// wait no we have to save the registers don't we
+				// shit, what?
+				// let's just push the arguments for now
+
+			}
+			
 		
 	
 
