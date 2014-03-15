@@ -1,5 +1,7 @@
 #include "generator.h"
+#include <math.h>
 #include "math.h"
+
 extern int outputStage; // This variable is located in vslc.c
 static char* currentClass = NULL;
 int peephole = 0;
@@ -340,20 +342,23 @@ void gen_EXPRESSION ( node_t *root, int scopedepth )
 							// sigh, I'll put it in r0 and then push it then I guess
 							// oh right string constants are handled differently
 							switch (child->data_type.base_type) {
-								case STRING_TYPE:
+								case STRING_TYPE:;
 									// do that thing described in the recitation slides with STRINGX
 									// how do I do a lookup in the string table?
 									// oh node_t has a field called string_index
 									// that was easy
 									// or well, I have to pass ".STRING%i", string_index to instruction_add
 									// which is... less easy 
-									int indexLength = log(child->string_index); // should round the return value down
+												 /*
+									int indexLength = (int)log10(child->string_index); // should round the return value down
 									int strL = 7+indexLength; // length of ".STRING%i"
 									char* strArg = malloc(sizeof(char) * strL);
 									sprintf(strArg, ".STRING%i", child->string_index); // stores the string in strArg
 									// why does MOVE32 put the target register as the second operand
 									// and the constant as the first operand? that is hella weird man
 									instruction_add(MOVE32, strArg, r0, 0, 0);
+									*/
+									// linker error with log10 so commented out for now
 									break;
 								case BOOL_TYPE:
 									// 1 for True, 0 for False
@@ -393,7 +398,18 @@ void gen_VARIABLE ( node_t *root, int scopedepth )
 	
 	tracePrint ( "Starting VARIABLE\n");
 
-	
+	if (root->nodetype.index != VARIABLE) {
+		// eh
+		return;
+	}
+	// "Load from memory using stack offset from symbol table"
+	symbol_t* st = symbol_get(root->label);
+	// wait, load from memory? Into what? A register?
+   	// which register? What kind of rules govern this?
+	// I am just going to put it in r0
+	instruction_add(LOAD, r0, fp, 0, st->stack_offset);
+	// how do we know what register it is in later?
+	// man this is weird
 
 	tracePrint ( "End VARIABLE %s, stack offset: %d\n", root->label, root->entry->stack_offset);
 }
@@ -401,6 +417,18 @@ void gen_VARIABLE ( node_t *root, int scopedepth )
 void gen_CONSTANT (node_t * root, int scopedepth)
 {
 	tracePrint("Starting CONSTANT\n");
+	if (root->nodetype.index != CONSTANT) {
+		return;
+	}
+
+	switch (root->data_type.base_type) {
+		case INT_TYPE:
+			//  INTs are 4bytes so we can just use MOV
+			instruction_add(MOVE, r0, NULL, root->int_const, 0);
+			break;
+		default:
+			break;
+	}
 	
 
 
