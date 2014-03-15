@@ -1,4 +1,5 @@
 #include "generator.h"
+#include "math.h"
 extern int outputStage; // This variable is located in vslc.c
 static char* currentClass = NULL;
 int peephole = 0;
@@ -312,10 +313,10 @@ void gen_EXPRESSION ( node_t *root, int scopedepth )
 	
 	tracePrint ( "Starting EXPRESSION of type %s\n", (char*) root->expression_type.text);
 
+	node_t* expr_list; //gcc wouldn't let me put it inside the case :(
 	switch(root->expression_type.index){
 
 		case FUNC_CALL_E:
-			node_t* expr_list;
 			// check if there's an expression list amongst the children
 			for (int i = 0; i < root->n_children; i++) {
 				if (root->children[i]->nodetype.index == EXPRESSION_LIST) {
@@ -329,7 +330,43 @@ void gen_EXPRESSION ( node_t *root, int scopedepth )
 				// wait no we have to save the registers don't we
 				// shit, what?
 				// let's just push the arguments for now
-
+				for (int i = 0; i < expr_list->n_children; i++) {
+					node_t* child = expr_list->children[i];
+					switch (child->nodetype.index) {
+						case CONSTANT:
+							//value stored in node_t union, find out which one by looking at its base type
+							// just push the value onto the stack
+							// wait, can I not push constants directly?
+							// sigh, I'll put it in r0 and then push it then I guess
+							// oh right string constants are handled differently
+							switch (child->data_type.base_type) {
+								case STRING_TYPE:
+									// do that thing described in the recitation slides with STRINGX
+									// how do I do a lookup in the string table?
+									// oh node_t has a field called string_index
+									// that was easy
+									// or well, I have to pass ".STRING%i", string_index to instruction_add
+									// which is... less easy 
+									int indexLength = log(child->string_index); // should round the return value down
+									int strL = 7+indexLength; // length of ".STRING%i"
+									char* strArg = malloc(sizeof(char) * strL);
+									sprintf(strArg, ".STRING%i", child->string_index); // stores the string in strArg
+									// why does MOVE32 put the target register as the second operand
+									// and the constant as the first operand? that is hella weird man
+									instruction_add(MOVE32, strArg, r0, 0, 0);
+									break;
+								case BOOL_TYPE:
+									// 1 for True, 0 for False
+									break;
+								default:
+									// just push it
+									break;
+							}
+							break;
+						case VARIABLE:
+							break;
+					}
+				}
 			}
 			
 		
