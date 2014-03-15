@@ -224,6 +224,11 @@ void gen_DECLARATION_STATEMENT (node_t *root, int scopedepth)
 {
 	tracePrint("Starting DECLARATION: adding space on stack\n");
 
+	// I think we should just like
+	// push r0 onto the stack here
+	instruction_add(PUSH, r0, NULL, 0, 0);
+	//(because VSL doesn't make any guarantees about the value of un-initialized variables
+	//or so the recitation slides say)
 
 
 	tracePrint("Ending DECLARATION\n");
