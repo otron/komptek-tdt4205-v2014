@@ -399,26 +399,37 @@ void gen_CONSTANT (node_t * root, int scopedepth)
 				val = 0;
 			instruction_add(MOVE, r0, NULL, val, 0);
 			break;
-		case STRING_TYPE:
-
-
+		case STRING_TYPE: ;
 			// do that thing described in the recitation slides with STRINGX
 			// how do I do a lookup in the string table?
 			// oh node_t has a field called string_index
 			// that was easy
 			// or well, I have to pass ".STRING%i", string_index to instruction_add
 			// which is... less easy 
-	/*		
-		   int indexLength = (int)log10(root->string_index); // should round the return value down
-		   int strL = 7+indexLength; // length of ".STRING%i"
-		   char* strArg = malloc(sizeof(char) * strL);
-		   sprintf(strArg, ".STRING%i", root->string_index); // stores the string in strArg
-		   */
-			// why does MOVE32 put the target register as the second operand
-			// and the constant as the first operand? that is hella weird man
-		//	instruction_add(MOVE32, strArg, r0, 0, 0);
-			 
-			// linker error with log10 so commented out for now
+
+			// step 1: find the length of string_index in characters
+			int indexLength = 7; // lengthOf(".STRING") = 7
+			if (root->string_index != 0) // log10(0) is undefined and idk what it returns but it causes segfaults
+				indexLength += ((int) ceil(log10(root->string_index)));
+			
+			//step 2: allocate enough space for the string/char pointer
+			char* strArg = malloc(sizeof(char) * (indexLength+1));
+			// step 3: store the formatted string in strArg
+			sprintf(strArg, ".STRING%d", root->string_index); 
+			
+			instruction_add(MOVE32, strArg, r0, 0, 0);
+
+			// step 4: free memory used by strArg?
+			free(strArg);
+			break;
+		case CLASS_TYPE:
+			// ???
+			break;
+		case VOID_TYPE:
+			// ???
+			break;
+		case ARRAY_TYPE:
+			// hm
 			break;
 		default:
 			break;
