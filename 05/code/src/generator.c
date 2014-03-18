@@ -384,7 +384,8 @@ void gen_VARIABLE ( node_t *root, int scopedepth )
 	// man this is weird
 	// wait are we supposed to push it onto the stack?
 	// like with constants?
-	instruction_add(POP, r0, NULL, 0, 0);
+	instruction_add(PUSH, r0, NULL, 0, 0);
+	// yeah why not, might be an expression after all.
 
 	tracePrint ( "End VARIABLE %s, stack offset: %d\n", root->label, root->entry->stack_offset);
 }
@@ -466,7 +467,31 @@ void gen_ASSIGNMENT_STATEMENT ( node_t *root, int scopedepth )
 
 	tracePrint ( "Starting ASSIGNMENT_STATEMENT\n");
 
+	if (root->nodetype.index != ASSIGNMENT_STATEMENT)
+		return; // ????
 
+	// LHS = child[0]
+	// RHS = child[1]
+	node_t* LHS = root->children[0];
+	node_t* RHS = root->children[1];
+
+	// step 1: call generate on the RHS
+	RHS->generate(RHS, scopedepth);
+	// result of the RHS expression or whatever is now on the top of the stack
+	// LHS should be a variable
+	// step 2: put top-of-stack value into LHS
+
+	if (LHS->nodetype.index == VARIABLE) {
+		symbol_t* st = symbol_get(LHS->label);
+		if (st == NULL)
+			return; // ???
+		instruction_add(POP, r1, NULL, 0, 0);
+		instruction_add(STORE, r1, fp, 0, st->stack_offset);
+		// yeah so the thing is I don't think this'll work
+		// because I'm assuming that the variable is a local one in this scope, no?
+		// anyway whatever
+	}
+	// if LHS isn't a variable then idk what to do
 
 
 
