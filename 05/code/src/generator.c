@@ -1,6 +1,5 @@
 #include "generator.h"
-#include <math.h>
-#include "math.h"
+#include <math.h> // y does this not work
 
 extern int outputStage; // This variable is located in vslc.c
 static char* currentClass = NULL;
@@ -19,7 +18,7 @@ typedef enum {
 static char
 	*lr = "lr", *r0 = "r0", *r1 = "r1", *r2 = "r2", *r3 = "r3",
 	*fp = "fp", *sp = "sp", *r5 = "r5", *r6 = "r6",
-	*d0 = "d0", *d1="d1", *s0 = "s0", *s1 = "s1";
+	*d0 = "d0", *d1="d1", *s0 = "s0", *s1 = "s1", *pc = "pc";
 
 
 /* A struct to make linked lists from instructions */
@@ -99,8 +98,9 @@ void gen_default ( node_t *root, int scopedepth)
 	}
 
 	for ( int i=0; i<root->n_children; i++ )
-		if( root->children[i] != NULL )
+		if( root->children[i] != NULL ) {
 			root->children[i]->generate ( root->children[i], scopedepth );
+		}
 }
 
 
@@ -166,6 +166,7 @@ void gen_FUNCTION ( node_t *root, int scopedepth )
     
 	if (root->nodetype.index != FUNCTION) {
 		// ????
+		return;
 	}
 	// step 1: make dat label
 	instruction_add(LABEL, STRDUP(root->label), NULL, 0, 0);
@@ -189,8 +190,11 @@ void gen_FUNCTION ( node_t *root, int scopedepth )
 	// and by that I think they want us to traverse the tree
 	// this is step 3 (execute function)
 	for (int i = 0; i < root->n_children; i++) {
-		if (root->children[i] != NULL)
-			root->children[i]->generate(root->children[i], scopedepth);	
+		node_t* child = root->children[i];
+		if (child == NULL) {
+			continue;
+		}
+		child->generate(child, scopedepth+1);	
 	}
     
 
@@ -206,12 +210,11 @@ void gen_FUNCTION ( node_t *root, int scopedepth )
 	// oh what, I'm not allowed to make changes to the program counter directly with this framework?
 	// WELL FINE
 	// pop return address
-	instruction_add(POP, lr, NULL, 0, 0);
-	// jump? idk if bl accepts registers. The recitation slides say bl works with labels
-	instruction_add(JUMP, lr, NULL, 0, 0);
-
+	// (I made a pc pointer!)
+	instruction_add(POP, pc, NULL, 0, 0);
 	// and that's it
 
+	
 
 	//Leaving the scope, decreasing depth
 	tracePrint ("Leaving FUNCTION (%s) with depth %d\n", root->label, scopedepth);
@@ -317,11 +320,10 @@ void gen_EXPRESSION ( node_t *root, int scopedepth )
 
 	node_t* expr_list; //gcc wouldn't let me put it inside the case :(
 	switch(root->expression_type.index){
-
 		case FUNC_CALL_E:
 			// check if there's an expression list amongst the children
 			for (int i = 0; i < root->n_children; i++) {
-				if (root->children[i]->nodetype.index == EXPRESSION_LIST) {
+				if (root->children[i] != NULL && root->children[i]->nodetype.index == EXPRESSION_LIST) {
 					expr_list = root->children[i];
 					break;
 				}
@@ -333,47 +335,9 @@ void gen_EXPRESSION ( node_t *root, int scopedepth )
 				// shit, what?
 				// let's just push the arguments for now
 				for (int i = 0; i < expr_list->n_children; i++) {
-					node_t* child = expr_list->children[i];
-					switch (child->nodetype.index) {
-						case CONSTANT:
-							//value stored in node_t union, find out which one by looking at its base type
-							// just push the value onto the stack
-							// wait, can I not push constants directly?
-							// sigh, I'll put it in r0 and then push it then I guess
-							// oh right string constants are handled differently
-							switch (child->data_type.base_type) {
-								case STRING_TYPE:;
-									// do that thing described in the recitation slides with STRINGX
-									// how do I do a lookup in the string table?
-									// oh node_t has a field called string_index
-									// that was easy
-									// or well, I have to pass ".STRING%i", string_index to instruction_add
-									// which is... less easy 
-												 /*
-									int indexLength = (int)log10(child->string_index); // should round the return value down
-									int strL = 7+indexLength; // length of ".STRING%i"
-									char* strArg = malloc(sizeof(char) * strL);
-									sprintf(strArg, ".STRING%i", child->string_index); // stores the string in strArg
-									// why does MOVE32 put the target register as the second operand
-									// and the constant as the first operand? that is hella weird man
-									instruction_add(MOVE32, strArg, r0, 0, 0);
-									*/
-									// linker error with log10 so commented out for now
-									break;
-								case BOOL_TYPE:
-									// 1 for True, 0 for False
-									break;
-								default:
-									// just push it
-									break;
-							}
-							break;
-						case VARIABLE:
-							break;
-					}
+					//node_t* child = expr_list->children[i];
 				}
 			}
-			
 		
 	
 
@@ -383,15 +347,6 @@ void gen_EXPRESSION ( node_t *root, int scopedepth )
 
 	tracePrint ( "Ending EXPRESSION of type %s\n", (char*) root->expression_type.text);
 }
-
-
-
-
-
-
-
-
-
 
 void gen_VARIABLE ( node_t *root, int scopedepth )
 {
@@ -410,6 +365,8 @@ void gen_VARIABLE ( node_t *root, int scopedepth )
 	instruction_add(LOAD, r0, fp, 0, st->stack_offset);
 	// how do we know what register it is in later?
 	// man this is weird
+	// wait are we supposed to push it onto the stack?
+	// like with constants?
 
 	tracePrint ( "End VARIABLE %s, stack offset: %d\n", root->label, root->entry->stack_offset);
 }
@@ -422,14 +379,55 @@ void gen_CONSTANT (node_t * root, int scopedepth)
 	}
 
 	switch (root->data_type.base_type) {
+		case FLOAT_TYPE:
+		//	instruction_add(MOVE32, root->float_const, r0, 0, 0);
+			break;
 		case INT_TYPE:
 			//  INTs are 4bytes so we can just use MOV
-			instruction_add(MOVE, r0, NULL, root->int_const, 0);
+		//	instruction_add(MOVE32, root->int_const, r0, 0, 0);
+			break;
+		case DOUBLE_TYPE:
+			// wait weren't all data types in VSL 4 bytes?
+			// which makes it weird that doubles are a thing because those are typically 8 bytes, right?
+			// idk man
+		//	instruction_add(MOVE32, root->double_const, r0, 0, 0);
+			break;
+		case BOOL_TYPE: ;
+			// I am assuming that the vsl stuff uses 0 for false
+			// and that anything that's not 0 is true
+			int val = 1;
+			if (root->bool_const == 0)
+				val = 0;
+			instruction_add(MOVE, r0, NULL, val, 0);
+			break;
+		case STRING_TYPE:
+
+
+			// do that thing described in the recitation slides with STRINGX
+			// how do I do a lookup in the string table?
+			// oh node_t has a field called string_index
+			// that was easy
+			// or well, I have to pass ".STRING%i", string_index to instruction_add
+			// which is... less easy 
+	/*		
+		   int indexLength = (int)log10(root->string_index); // should round the return value down
+		   int strL = 7+indexLength; // length of ".STRING%i"
+		   char* strArg = malloc(sizeof(char) * strL);
+		   sprintf(strArg, ".STRING%i", root->string_index); // stores the string in strArg
+		   */
+			// why does MOVE32 put the target register as the second operand
+			// and the constant as the first operand? that is hella weird man
+		//	instruction_add(MOVE32, strArg, r0, 0, 0);
+			 
+			// linker error with log10 so commented out for now
 			break;
 		default:
 			break;
 	}
-	
+	// move constant to the top of the stack
+	instruction_add(PUSH, r0, NULL, 0, 0);
+
+
 
 
 	tracePrint("End CONSTANT\n");
@@ -437,24 +435,24 @@ void gen_CONSTANT (node_t * root, int scopedepth)
 
 void gen_ASSIGNMENT_STATEMENT ( node_t *root, int scopedepth )
 {
-	
-	 tracePrint ( "Starting ASSIGNMENT_STATEMENT\n");
+
+	tracePrint ( "Starting ASSIGNMENT_STATEMENT\n");
 
 
-	
-	
+
+
 
 	tracePrint ( "End ASSIGNMENT_STATEMENT\n");
 }
 
 void gen_RETURN_STATEMENT ( node_t *root, int scopedepth )
 {
-	
+
 	tracePrint ( "Starting RETURN_STATEMENT\n");
-	
+
 	// so my code goes here, then? ok. Let's try that
 	// just gotta store the value returned by the expression in r0
-	
+
 	tracePrint ( "End RETURN_STATEMENT\n");
 }
 
@@ -462,423 +460,430 @@ void gen_RETURN_STATEMENT ( node_t *root, int scopedepth )
 
 
 
-static void
+	static void
 instructions_print ( FILE *stream )
 {
-    instruction_t *this = start;
+	instruction_t *this = start;
 
-		while ( this != NULL )
+	while ( this != NULL )
+	{
+		switch ( this->opcode ) // ARM
 		{
-		    switch ( this->opcode ) // ARM
-		    {
-		        case PUSH:
-		            if ( this->offsets[0] == 0 )
-		                fprintf ( stream, "\tpush\t{%s}\n", this->operands[0] );
-		            else
-		                fprintf ( stream, "\tpushl TODO\t%d(%s)\n",
-		                        this->offsets[0], this->operands[0]
-		                        );
-		            break;
-		        case POP:
-		            if ( this->offsets[0] == 0 )
-		                fprintf ( stream, "\tpop\t{%s}\n", this->operands[0] );
-		            else
-		                fprintf ( stream, "\tpopl TODO\t%d(%s)\n",
-		                        this->offsets[0], this->operands[0]
-		                        );
-		            break;
+			case PUSH:
+				if ( this->offsets[0] == 0 )
+					fprintf ( stream, "\tpush\t{%s}\n", this->operands[0] );
+				else
+					fprintf ( stream, "\tpushl TODO\t%d(%s)\n",
+							this->offsets[0], this->operands[0]
+							);
+				break;
+			case POP:
+				if ( this->offsets[0] == 0 )
+					fprintf ( stream, "\tpop\t{%s}\n", this->operands[0] );
+				else
+					fprintf ( stream, "\tpopl TODO\t%d(%s)\n",
+							this->offsets[0], this->operands[0]
+							);
+				break;
 
-		        case MOVE32:
-		        	if ( this->offsets[0] == 0 && this->offsets[1] == 0 )
-		        		/*
-		        		snprintf(buff2, 100, "\tmovw	r0, #:lower16:%s", buff);
-		        		instruction_add(STRING, STRDUP(buff2), NULL, 0,0);
-		        		snprintf(buff2, 100, "\tmovt	r0, #:upper16:%s", buff);
-		        		instruction_add(STRING, STRDUP(buff2), NULL, 0,0);
-		        		*/
-		        		fprintf ( stream, "\tmovw\t%s, #:lower16:%s\n",
-		        		          this->operands[1], this->operands[0]+1
-		        		          );
-		        		fprintf ( stream, "\tmovt\t%s, #:upper16:%s\n",
-		        			      this->operands[1], this->operands[0]+1
-		        		          );
-		        	break;
+			case MOVE32:
+				if ( this->offsets[0] == 0 && this->offsets[1] == 0 ) 
+					/*
+					   snprintf(buff2, 100, "\tmovw	r0, #:lower16:%s", buff);
+					   instruction_add(STRING, STRDUP(buff2), NULL, 0,0);
+					   snprintf(buff2, 100, "\tmovt	r0, #:upper16:%s", buff);
+					   instruction_add(STRING, STRDUP(buff2), NULL, 0,0);
+					 */
+					fprintf ( stream, "\tmovw\t%s, #:lower16:%s\n",
+							this->operands[1], this->operands[0]+1
+							);
+				fprintf ( stream, "\tmovt\t%s, #:upper16:%s\n",
+						this->operands[1], this->operands[0]+1
+						);
+				break;
+				// if offsets are not 0
+				/*
+				fprintf (stream, "\tmovw\t%s, #:lower16:%i\n",
+						this->operands[1], this->offsets[0]);
+				fprintf (stream, "\tmovt\t%s, #:upper16:%i\n",
+						this->operands[1], this->offsets[0]);
 
-		        case MOVE:
-		            if ( this->offsets[0] == 0 && this->offsets[1] == 0 )
-		                fprintf ( stream, "\tmov\t%s, %s\n",
-		                        this->operands[0], this->operands[1]
-		                        );
-		            //Should not be used, for legacy support only
-		            else if ( this->offsets[0] != 0 && this->offsets[1] == 0 )
-		                fprintf ( stream, "\tldr\t%s, [%s, #%d]\n", 
-		                        this->operands[1], this->operands[0], this->offsets[0]
-		                        );
-		            else if ( this->offsets[0] == 0 && this->offsets[1] != 0 )
-		                fprintf ( stream, "\tstr\t%s, [%s, #%d]\n",
-		                        this->operands[0], this->operands[1], this->offsets[1]
-		                        );
-		            break;
-		        
-		        
-		        case LOAD:
-		            if ( this->offsets[0] == 0 && this->offsets[1] == 0 )
-		                fprintf ( stream, "\tldr\t%s, [%s]\n",
-		                        this->operands[0], this->operands[1]
-		                        );
-		            else if ( this->offsets[0] == 0 && this->offsets[1] != 0 )
-		                fprintf ( stream, "\tldr\t%s, [%s, #%d]\n", 
-		                        //this->offsets[0], this->operands[0], this->operands[1] "\tmovl\t%d(%s),%s\n",
-		                        this->operands[0], this->operands[1], this->offsets[1]
-		                        );
-		            else if ( this->offsets[0] != 0 && this->offsets[1] == 0 )
-		                fprintf ( stream, "ERROR, LOAD format not correct\n",
-		                        //this->operands[0], this->offsets[1], this->operands[1] "\tmovl\t%s,%d(%s)\n"
-		                        this->operands[0], this->operands[1], this->offsets[1]
-		                        );
-		            break;
-		        
-		        case LOADS:
-		            if ( this->offsets[0] == 0 && this->offsets[1] == 0 )
-		                fprintf ( stream, "\tflds\t%s, [%s]\n",
-		                        this->operands[1], this->operands[0]
-		                        );
-		            else if ( this->offsets[0] != 0 && this->offsets[1] == 0 )
-		                fprintf ( stream, "\tflds\t%s, [%s, #%d]\n", 
-		                        //this->offsets[0], this->operands[0], this->operands[1] "\tmovl\t%d(%s),%s\n",
-		                        this->operands[1], this->operands[0], this->offsets[0]
-		                        );
-		            else if ( this->offsets[0] == 0 && this->offsets[1] != 0 )
-		                fprintf ( stream, "ERROR, LOAD format not correct\n",
-		                        //this->operands[0], this->offsets[1], this->operands[1] "\tmovl\t%s,%d(%s)\n"
-		                        this->operands[0], this->operands[1], this->offsets[1]
-		                        );
-		            break;
-		        
-		        
-		        case STORE:
-		            if ( this->offsets[0] == 0 && this->offsets[1] == 0 )
-		                fprintf ( stream, "\tstr\t%s, [%s]\n",
-		                        this->operands[0], this->operands[1]
-		                        );
-		            else if ( this->offsets[1] != 0 && this->offsets[0] == 0 )
-		                fprintf ( stream, "\tstr\t%s, [%s, #%d]\n", 
-		                        //this->offsets[0], this->operands[0], this->operands[1] "\tmovl\t%d(%s),%s\n",
-		                        this->operands[0], this->operands[1], this->offsets[1]
-		                        );
-		            else if ( this->offsets[0] == 0 && this->offsets[1] != 0 )
-		                fprintf ( stream, "ERROR, STORE format not correct\n",
-		                        //this->operands[0], this->offsets[1], this->operands[1] "\tmovl\t%s,%d(%s)\n"
-		                        this->operands[0], this->operands[1], this->offsets[1]
-		                        );
-		            break;
-		        
-		        case STORES:
-		            if ( this->offsets[0] == 0 && this->offsets[1] == 0 )
-		                fprintf ( stream, "\tfsts\t%s, [%s]\n",
-		                        this->operands[0], this->operands[1]
-		                        );
-		            else if ( this->offsets[0] != 0 && this->offsets[1] == 0 )
-		                fprintf ( stream, "\tfsts\t%s, [%s, #%d]\n", 
-		                        //this->offsets[0], this->operands[0], this->operands[1] "\tmovl\t%d(%s),%s\n",
-		                        this->operands[0], this->operands[1], this->offsets[0]
-		                        );
-		            else if ( this->offsets[0] == 0 && this->offsets[1] != 0 )
-		                fprintf ( stream, "ERROR, STORE format not correct\n",
-		                        //this->operands[0], this->offsets[1], this->operands[1] "\tmovl\t%s,%d(%s)\n"
-		                        this->operands[0], this->operands[1], this->offsets[1]
-		                        );
-		            break;
-		        
-		        case SET:
-		            if ( this->offsets[0] == 0 && this->offsets[1] == 0 )
-		                fprintf ( stream, "SET ERROR: set\t%s, %s\n",
-		                        this->operands[1], this->operands[0]
-		                        );
-		            else if ( this->offsets[0] != 0 && this->offsets[1] == 0 )
-		                fprintf ( stream, "\tmov\t%s, #%d\n", 
-		                        //this->offsets[0], this->operands[0], this->operands[1] "\tmovl\t%d(%s),%s\n",
-		                        this->operands[0], this->offsets[0]
-		                        );
-		            else if ( this->offsets[0] == 0 && this->offsets[1] != 0 )
-		                fprintf ( stream, "\tmovl\t%s,%d(%s)\n",
-		                        this->operands[0], this->offsets[1], this->operands[1]
-		                        );
-		            break;
-
-		        case MOVES:
-					if ( this->offsets[0] == 0 && this->offsets[1] == 0 )
-						fprintf ( stream, "\tmfcpys\t%s, %s\n",
-								this->operands[1], this->operands[0]
-								);
-					else if ( this->offsets[0] != 0 && this->offsets[1] == 0 )
-						fprintf ( stream, "\tError: NOT possible for ARM, use load/store\t%d(%s),%s\n",
-								this->offsets[0], this->operands[0], this->operands[1]
-								);
-					else if ( this->offsets[0] == 0 && this->offsets[1] != 0 )
-						fprintf ( stream, "\tError: NOT possible for ARM, use load/store\t%s,%d(%s)\n",
-								this->operands[0], this->offsets[1], this->operands[1]
-								);
-					break;
-
-		        case MOVED:
-					if ( this->offsets[0] == 0 && this->offsets[1] == 0 )
-						fprintf ( stream, "\tmfcpyd TODO\t%s,%s\n",
-								this->operands[1], this->operands[0]
-								);
-					else if ( this->offsets[0] != 0 && this->offsets[1] == 0 )
-						fprintf ( stream, "\tError: NOT possible for ARM, use load/store\t%s, [%s,#%d]\n",  
-								//this->offsets[0], this->operands[0], this->operands[1]   "\ldr\t%d(%s),%s\n",
-								this->operands[1], this->operands[0], this->offsets[0]
-								);
-					else if ( this->offsets[0] == 0 && this->offsets[1] != 0 )
-						fprintf ( stream, "\tError: NOT possible for ARM, use load/store\t%s,%d(%s)\n",
-								this->operands[0], this->offsets[1], this->operands[1]
-								);
-					break;
-
-		        case CVTSD:
-					if ( this->offsets[0] == 0 && this->offsets[1] == 0 )
-						fprintf ( stream, "\tfcvtds\t%s,%s\n",
-								this->operands[1], this->operands[0]
-								);
-					else if ( this->offsets[0] != 0 && this->offsets[1] == 0 )
-						fprintf ( stream, "\tfcvtds TODO\t%d(%s),%s\n",
-								this->offsets[0], this->operands[0], this->operands[1]
-								);
-					else if ( this->offsets[0] == 0 && this->offsets[1] != 0 )
-						fprintf ( stream, "\tfcvtds TODO\t%s,%d(%s)\n",
-								this->operands[0], this->offsets[1], this->operands[1]
-								);
-					break;
+				break; */
+			case MOVE:
+				if ( this->offsets[0] == 0 && this->offsets[1] == 0 )
+					fprintf ( stream, "\tmov\t%s, %s\n",
+							this->operands[0], this->operands[1]
+							);
+				//Should not be used, for legacy support only
+				else if ( this->offsets[0] != 0 && this->offsets[1] == 0 )
+					fprintf ( stream, "\tldr\t%s, [%s, #%d]\n", 
+							this->operands[1], this->operands[0], this->offsets[0]
+							);
+				else if ( this->offsets[0] == 0 && this->offsets[1] != 0 )
+					fprintf ( stream, "\tstr\t%s, [%s, #%d]\n",
+							this->operands[0], this->operands[1], this->offsets[1]
+							);
+				break;
 
 
+			case LOAD:
+				if ( this->offsets[0] == 0 && this->offsets[1] == 0 )
+					fprintf ( stream, "\tldr\t%s, [%s]\n",
+							this->operands[0], this->operands[1]
+							);
+				else if ( this->offsets[0] == 0 && this->offsets[1] != 0 )
+					fprintf ( stream, "\tldr\t%s, [%s, #%d]\n", 
+							//this->offsets[0], this->operands[0], this->operands[1] "\tmovl\t%d(%s),%s\n",
+							this->operands[0], this->operands[1], this->offsets[1]
+							);
+				else if ( this->offsets[0] != 0 && this->offsets[1] == 0 )
+					fprintf ( stream, "ERROR, LOAD format not correct\n",
+							//this->operands[0], this->offsets[1], this->operands[1] "\tmovl\t%s,%d(%s)\n"
+							this->operands[0], this->operands[1], this->offsets[1]
+							);
+				break;
 
-		        case ADD:
-		            if ( this->offsets[0] == 0 && this->offsets[1] == 0 )
-		                fprintf ( stream, "\tadd\t%s, %s\n",
-		                        this->operands[1], this->operands[0]
-		                        );
-		            else if ( this->offsets[0] != 0 && this->offsets[1] == 0 )
-		                fprintf ( stream, "\taddl\t%d(%s),%s\n",
-		                        this->offsets[0], this->operands[0], this->operands[1]
-		                        );
-		            else if ( this->offsets[0] == 0 && this->offsets[1] != 0 )
-		                fprintf ( stream, "\taddl\t%s,%d(%s)\n",
-		                        this->operands[0], this->offsets[1], this->operands[1]
-		                        );
-		            break;
-		        
-		        case FADD:
-		            if ( this->offsets[0] == 0 && this->offsets[1] == 0 )
-		                fprintf ( stream, "\tfadds\t%s, %s, %s\n",
-		                 		this->operands[1], this->operands[1], this->operands[0]
-		                	   );
-		            break;
-		        
-		        case SUB:
-		            if ( this->offsets[0] == 0 && this->offsets[1] == 0 )
-		                fprintf ( stream, "\tsub\t%s, %s\n",
-		                        this->operands[1], this->operands[0]
-		                        );
-		            else if ( this->offsets[0] != 0 && this->offsets[1] == 0 )
-		                fprintf ( stream, "\tsubl\t%d(%s),%s\n",
-		                        this->offsets[0], this->operands[0], this->operands[1]
-		                        );
-		            else if ( this->offsets[0] == 0 && this->offsets[1] != 0 )
-		                fprintf ( stream, "\tsubl\t%s,%d(%s)\n",
-		                        this->operands[0], this->offsets[1], this->operands[1]
-		                        );
-		            break;
-		        
-		         case FSUB:
-		            if ( this->offsets[0] == 0 && this->offsets[1] == 0 )
-		                fprintf ( stream, "\tfsubs\t%s, %s, %s\n",
-		                        this->operands[1], this->operands[1], this->operands[0]
-		                        );
-		            else
-		            	fprintf ( stream, "Not supported...\tfsub\t%s, %s\n",
-		            			this->operands[1], this->operands[0]
-		                        );
-		        	break;
-		        
-		        case MUL:
-		            if ( this->offsets[0] == 0 )
-		                fprintf ( stream, "\tmul\t r0, %s\n", this->operands[0] ); 
-		            else
-		                fprintf ( stream, "Not supported...\tmul\t%d(%s)\n",
-		                        this->offsets[0], this->operands[0]
-		                        );
-		            break;
-		         case FMUL:
-		            if ( this->offsets[0] == 0 )
-		                fprintf ( stream, "\tfmuls\t %s, %s, %s\n", this->operands[1], this->operands[1], this->operands[0] ); 
-		            else
-		                fprintf ( stream, "Not supported...\tfmul\t%d(%s)\n",
-		                        this->offsets[0], this->operands[0]
-		                        );
-		            break;
-		        case DIV:
-		            if ( this->offsets[0] == 0 &&  this->operands[1] == NULL)
-		                fprintf ( stream, "\tsdiv\tr0, r0, %s\n", this->operands[0] );
-		            else  if ( this->offsets[0] == 0)
-		                fprintf ( stream, "\tsdiv\t%s, %s, %s\n", this->operands[1], this->operands[1], this->operands[0] );
-		            else
-		                fprintf ( stream, "\tidivl TODO\t%d(%s)\n",
-		                        this->offsets[0], this->operands[0]
-		                        );
-		            break;
-		        case FDIV:
-		            if ( this->offsets[0] == 0 &&  this->operands[1] == NULL)
-		                fprintf ( stream, "\tfdivs\ts0, s0, %s\n", this->operands[0] );
-		            else  if ( this->offsets[0] == 0)
-		                fprintf ( stream, "\tfdivs\t%s, %s, %s\n", this->operands[1], this->operands[1], this->operands[0] );
-		            else
-		                fprintf ( stream, "\tidivl TODO\t%d(%s)\n",
-		                        this->offsets[0], this->operands[0]
-		                        );
-		            break;
-		        case NEG:
-		            if ( this->offsets[0] == 0 )
-		                fprintf ( stream, "\tnegl\t%s\n", this->operands[0] );
-		            else
-		                fprintf ( stream, "\tnegl\t%d(%s)\n",
-		                        this->offsets[0], this->operands[0]
-		                        );
-		            break;
+			case LOADS:
+				if ( this->offsets[0] == 0 && this->offsets[1] == 0 )
+					fprintf ( stream, "\tflds\t%s, [%s]\n",
+							this->operands[1], this->operands[0]
+							);
+				else if ( this->offsets[0] != 0 && this->offsets[1] == 0 )
+					fprintf ( stream, "\tflds\t%s, [%s, #%d]\n", 
+							//this->offsets[0], this->operands[0], this->operands[1] "\tmovl\t%d(%s),%s\n",
+							this->operands[1], this->operands[0], this->offsets[0]
+							);
+				else if ( this->offsets[0] == 0 && this->offsets[1] != 0 )
+					fprintf ( stream, "ERROR, LOAD format not correct\n",
+							//this->operands[0], this->offsets[1], this->operands[1] "\tmovl\t%s,%d(%s)\n"
+							this->operands[0], this->operands[1], this->offsets[1]
+							);
+				break;
 
-		        case DECL:
-		            fprintf ( stream, "\tsubs\t%s, #1\n", this->operands[0]); // The s turn on flag updates
-		            break;
-		        case CLTD:
-		            fprintf ( stream, "\t#cltd TODO\n" );
-		            break;
-		        case CBW:
-		            fprintf ( stream, "#\tcbw# Useless on ARM\n" );
-		            break;
-		        case CWDE:
-		            fprintf ( stream, "#\tcwde # Useless on ARM\n" );
-		            break;
-		        case CMPZERO:
-		            if ( this->offsets[0] == 0 )
-		                fprintf ( stream, "\tteq\t%s, $0\n", this->operands[0] ); // Test equal
-		            else
-		                fprintf ( stream, "\tcmpl\t$0,%d(%s)\n",
-		                        this->offsets[0], this->operands[0]
-		                        );
-		            break;
-		        case CMP:
-		            if ( this->offsets[0] == 0 && this->offsets[1] == 0 )
-		                fprintf ( stream, "\tcmp\t%s,%s\n",
-		                        this->operands[1], this->operands[0]
-		                        );
-		            else if ( this->offsets[0] != 0 && this->offsets[1] == 0 )
-		                fprintf ( stream, "\tcmpl\t%d(%s),%s\n",
-		                        this->offsets[0], this->operands[0], this->operands[1]
-		                        );
-		            else if ( this->offsets[0] == 0 && this->offsets[1] != 0 )
-		                fprintf ( stream, "\tcmpl\t%s,%d(%s)\n",
-		                        this->operands[0], this->offsets[1], this->operands[1]
-		                        );
-		            break;
-		        case SETL:
-		            if ( this->offsets[0] == 0 )
-		                fprintf ( stream, "\tmov\t %s, #0\t\n\tmovlt\t %s, #1\n", this->operands[0], this->operands[0] );
-		            else
-		                fprintf ( stream, "ERROR: TODO\tsetl\t%d(%s)\n",
-		                        this->offsets[0], this->operands[0]
-		                        );
-		            break;
-		        case SETG:
-		            if ( this->offsets[0] == 0 )
-		                fprintf ( stream, "\tmov\t %s, #0\t\n\tmovgt\t %s, #1\n", this->operands[0], this->operands[0] );
-		            else
-		                fprintf ( stream, "ERROR: TODO\tsetg\t%d(%s)\n",
-		                        this->offsets[0], this->operands[0]
-		                        );
-		            break;
-		        case SETLE:
-		            if ( this->offsets[0] == 0 )
-		                fprintf ( stream, "\tmov\t %s, #0\t\n\tmovle\t %s, #1\n", this->operands[0], this->operands[0] );
-		            else
-		                fprintf ( stream, "ERROR: TODO\tsetle\t%d(%s)\n",
-		                        this->offsets[0], this->operands[0]
-		                        );
-		            break;
-		        case SETGE:
-		            if ( this->offsets[0] == 0 )
-		                fprintf ( stream, "\tmov\t %s, #0\t\n\tmovge\t %s, #1\n", this->operands[0], this->operands[0] );
-		            else
-		                fprintf ( stream, "ERROR: TODO\tsetge\t%d(%s)\n",
-		                        this->offsets[0], this->operands[0]
-		                        );
-		            break;
-		        case SETE:
-		            if ( this->offsets[0] == 0 )
-		                fprintf ( stream, "\tmov\t %s, #0\t\n\tmoveq\t %s, #1\n", this->operands[0], this->operands[0] );
-		            else
-		                fprintf ( stream, "ERROR: TODO\tsete\t%d(%s)\n",
-		                        this->offsets[0], this->operands[0]
-		                        );
-		            break;
-		        case SETNE:
-		            if ( this->offsets[0] == 0 )
-		                fprintf ( stream, "\tmov\t %s, #0\t\n\tmovne\t %s, #1\n", this->operands[0], this->operands[0] );
-		            else
-		                fprintf ( stream, "ERROR: TODO\tsetnq\t%d(%s)\n",
-		                        this->offsets[0], this->operands[0]
-		                        );
-		            break;
 
-		        case CALL: case SYSCALL:
-		            fprintf ( stream, "\tbl\t" );
-		            if ( this->opcode == CALL )
-		                fputc ( '_', stream );
-		            fprintf ( stream, "%s\n", this->operands[0] );
-		            break;
-		        case LABEL: 
-		            fprintf ( stream, "_%s:\n", this->operands[0] );
-		            break;
+			case STORE:
+				if ( this->offsets[0] == 0 && this->offsets[1] == 0 )
+					fprintf ( stream, "\tstr\t%s, [%s]\n",
+							this->operands[0], this->operands[1]
+							);
+				else if ( this->offsets[1] != 0 && this->offsets[0] == 0 )
+					fprintf ( stream, "\tstr\t%s, [%s, #%d]\n", 
+							//this->offsets[0], this->operands[0], this->operands[1] "\tmovl\t%d(%s),%s\n",
+							this->operands[0], this->operands[1], this->offsets[1]
+							);
+				else if ( this->offsets[0] == 0 && this->offsets[1] != 0 )
+					fprintf ( stream, "ERROR, STORE format not correct\n",
+							//this->operands[0], this->offsets[1], this->operands[1] "\tmovl\t%s,%d(%s)\n"
+							this->operands[0], this->operands[1], this->offsets[1]
+							);
+				break;
 
-		        case JUMP:
-		            fprintf ( stream, "\tb\t%s\n", this->operands[0] );
-		            break;
-		        case JUMPZERO:
-		            fprintf ( stream, "\tbeq\t%s\n", this->operands[0] ); // Same as equal on ARM  (?)
-		            break;
-		        case JUMPEQ:
-		            fprintf ( stream, "\tbeq\t%s\n", this->operands[0] );
-		            break;
-		        case JUMPNONZ:
-		            fprintf ( stream, "\tbne\t%s\n", this->operands[0] );// Same as !zero on ARM  (?)
-		            break;
+			case STORES:
+				if ( this->offsets[0] == 0 && this->offsets[1] == 0 )
+					fprintf ( stream, "\tfsts\t%s, [%s]\n",
+							this->operands[0], this->operands[1]
+							);
+				else if ( this->offsets[0] != 0 && this->offsets[1] == 0 )
+					fprintf ( stream, "\tfsts\t%s, [%s, #%d]\n", 
+							//this->offsets[0], this->operands[0], this->operands[1] "\tmovl\t%d(%s),%s\n",
+							this->operands[0], this->operands[1], this->offsets[0]
+							);
+				else if ( this->offsets[0] == 0 && this->offsets[1] != 0 )
+					fprintf ( stream, "ERROR, STORE format not correct\n",
+							//this->operands[0], this->offsets[1], this->operands[1] "\tmovl\t%s,%d(%s)\n"
+							this->operands[0], this->operands[1], this->offsets[1]
+							);
+				break;
 
-		        case LEAVE: 
-		        	// Same as "leave"
-		        	fprintf ( stream, "\tmov\tsp, fp\n");
-		        	fprintf ( stream, "\tpop\t{fp}\n");
-		        	break;
-		        case RET:   
-		        	fprintf ( stream, "\tpop\t{pc}\n");
-		        	break;
+			case SET:
+				if ( this->offsets[0] == 0 && this->offsets[1] == 0 )
+					fprintf ( stream, "SET ERROR: set\t%s, %s\n",
+							this->operands[1], this->operands[0]
+							);
+				else if ( this->offsets[0] != 0 && this->offsets[1] == 0 )
+					fprintf ( stream, "\tmov\t%s, #%d\n", 
+							//this->offsets[0], this->operands[0], this->operands[1] "\tmovl\t%d(%s),%s\n",
+							this->operands[0], this->offsets[0]
+							);
+				else if ( this->offsets[0] == 0 && this->offsets[1] != 0 )
+					fprintf ( stream, "\tmovl\t%s,%d(%s)\n",
+							this->operands[0], this->offsets[1], this->operands[1]
+							);
+				break;
 
-		        case STRING:
-		                    fprintf ( stream, "%s\n", this->operands[0] );
-		                    break;
-		        
-		        case COMMMENT:
-		                    fprintf ( stream, "#%s", this->operands[0] );
-		                    break;
+			case MOVES:
+				if ( this->offsets[0] == 0 && this->offsets[1] == 0 )
+					fprintf ( stream, "\tmfcpys\t%s, %s\n",
+							this->operands[1], this->operands[0]
+							);
+				else if ( this->offsets[0] != 0 && this->offsets[1] == 0 )
+					fprintf ( stream, "\tError: NOT possible for ARM, use load/store\t%d(%s),%s\n",
+							this->offsets[0], this->operands[0], this->operands[1]
+							);
+				else if ( this->offsets[0] == 0 && this->offsets[1] != 0 )
+					fprintf ( stream, "\tError: NOT possible for ARM, use load/store\t%s,%d(%s)\n",
+							this->operands[0], this->offsets[1], this->operands[1]
+							);
+				break;
 
-		        case NIL:
-		                    break;
+			case MOVED:
+				if ( this->offsets[0] == 0 && this->offsets[1] == 0 )
+					fprintf ( stream, "\tmfcpyd TODO\t%s,%s\n",
+							this->operands[1], this->operands[0]
+							);
+				else if ( this->offsets[0] != 0 && this->offsets[1] == 0 )
+					fprintf ( stream, "\tError: NOT possible for ARM, use load/store\t%s, [%s,#%d]\n",  
+							//this->offsets[0], this->operands[0], this->operands[1]   "\ldr\t%d(%s),%s\n",
+							this->operands[1], this->operands[0], this->offsets[0]
+							);
+				else if ( this->offsets[0] == 0 && this->offsets[1] != 0 )
+					fprintf ( stream, "\tError: NOT possible for ARM, use load/store\t%s,%d(%s)\n",
+							this->operands[0], this->offsets[1], this->operands[1]
+							);
+				break;
 
-		        default:
-		                    fprintf ( stderr, "Error in instruction stream\n" );
-		                    break;
-		    }
-		    this = this->next;
+			case CVTSD:
+				if ( this->offsets[0] == 0 && this->offsets[1] == 0 )
+					fprintf ( stream, "\tfcvtds\t%s,%s\n",
+							this->operands[1], this->operands[0]
+							);
+				else if ( this->offsets[0] != 0 && this->offsets[1] == 0 )
+					fprintf ( stream, "\tfcvtds TODO\t%d(%s),%s\n",
+							this->offsets[0], this->operands[0], this->operands[1]
+							);
+				else if ( this->offsets[0] == 0 && this->offsets[1] != 0 )
+					fprintf ( stream, "\tfcvtds TODO\t%s,%d(%s)\n",
+							this->operands[0], this->offsets[1], this->operands[1]
+							);
+				break;
 
-    }
+
+
+			case ADD:
+				if ( this->offsets[0] == 0 && this->offsets[1] == 0 )
+					fprintf ( stream, "\tadd\t%s, %s\n",
+							this->operands[1], this->operands[0]
+							);
+				else if ( this->offsets[0] != 0 && this->offsets[1] == 0 )
+					fprintf ( stream, "\taddl\t%d(%s),%s\n",
+							this->offsets[0], this->operands[0], this->operands[1]
+							);
+				else if ( this->offsets[0] == 0 && this->offsets[1] != 0 )
+					fprintf ( stream, "\taddl\t%s,%d(%s)\n",
+							this->operands[0], this->offsets[1], this->operands[1]
+							);
+				break;
+
+			case FADD:
+				if ( this->offsets[0] == 0 && this->offsets[1] == 0 )
+					fprintf ( stream, "\tfadds\t%s, %s, %s\n",
+							this->operands[1], this->operands[1], this->operands[0]
+							);
+				break;
+
+			case SUB:
+				if ( this->offsets[0] == 0 && this->offsets[1] == 0 )
+					fprintf ( stream, "\tsub\t%s, %s\n",
+							this->operands[1], this->operands[0]
+							);
+				else if ( this->offsets[0] != 0 && this->offsets[1] == 0 )
+					fprintf ( stream, "\tsubl\t%d(%s),%s\n",
+							this->offsets[0], this->operands[0], this->operands[1]
+							);
+				else if ( this->offsets[0] == 0 && this->offsets[1] != 0 )
+					fprintf ( stream, "\tsubl\t%s,%d(%s)\n",
+							this->operands[0], this->offsets[1], this->operands[1]
+							);
+				break;
+
+			case FSUB:
+				if ( this->offsets[0] == 0 && this->offsets[1] == 0 )
+					fprintf ( stream, "\tfsubs\t%s, %s, %s\n",
+							this->operands[1], this->operands[1], this->operands[0]
+							);
+				else
+					fprintf ( stream, "Not supported...\tfsub\t%s, %s\n",
+							this->operands[1], this->operands[0]
+							);
+				break;
+
+			case MUL:
+				if ( this->offsets[0] == 0 )
+					fprintf ( stream, "\tmul\t r0, %s\n", this->operands[0] ); 
+				else
+					fprintf ( stream, "Not supported...\tmul\t%d(%s)\n",
+							this->offsets[0], this->operands[0]
+							);
+				break;
+			case FMUL:
+				if ( this->offsets[0] == 0 )
+					fprintf ( stream, "\tfmuls\t %s, %s, %s\n", this->operands[1], this->operands[1], this->operands[0] ); 
+				else
+					fprintf ( stream, "Not supported...\tfmul\t%d(%s)\n",
+							this->offsets[0], this->operands[0]
+							);
+				break;
+			case DIV:
+				if ( this->offsets[0] == 0 &&  this->operands[1] == NULL)
+					fprintf ( stream, "\tsdiv\tr0, r0, %s\n", this->operands[0] );
+				else  if ( this->offsets[0] == 0)
+					fprintf ( stream, "\tsdiv\t%s, %s, %s\n", this->operands[1], this->operands[1], this->operands[0] );
+				else
+					fprintf ( stream, "\tidivl TODO\t%d(%s)\n",
+							this->offsets[0], this->operands[0]
+							);
+				break;
+			case FDIV:
+				if ( this->offsets[0] == 0 &&  this->operands[1] == NULL)
+					fprintf ( stream, "\tfdivs\ts0, s0, %s\n", this->operands[0] );
+				else  if ( this->offsets[0] == 0)
+					fprintf ( stream, "\tfdivs\t%s, %s, %s\n", this->operands[1], this->operands[1], this->operands[0] );
+				else
+					fprintf ( stream, "\tidivl TODO\t%d(%s)\n",
+							this->offsets[0], this->operands[0]
+							);
+				break;
+			case NEG:
+				if ( this->offsets[0] == 0 )
+					fprintf ( stream, "\tnegl\t%s\n", this->operands[0] );
+				else
+					fprintf ( stream, "\tnegl\t%d(%s)\n",
+							this->offsets[0], this->operands[0]
+							);
+				break;
+
+			case DECL:
+				fprintf ( stream, "\tsubs\t%s, #1\n", this->operands[0]); // The s turn on flag updates
+				break;
+			case CLTD:
+				fprintf ( stream, "\t#cltd TODO\n" );
+				break;
+			case CBW:
+				fprintf ( stream, "#\tcbw# Useless on ARM\n" );
+				break;
+			case CWDE:
+				fprintf ( stream, "#\tcwde # Useless on ARM\n" );
+				break;
+			case CMPZERO:
+				if ( this->offsets[0] == 0 )
+					fprintf ( stream, "\tteq\t%s, $0\n", this->operands[0] ); // Test equal
+				else
+					fprintf ( stream, "\tcmpl\t$0,%d(%s)\n",
+							this->offsets[0], this->operands[0]
+							);
+				break;
+			case CMP:
+				if ( this->offsets[0] == 0 && this->offsets[1] == 0 )
+					fprintf ( stream, "\tcmp\t%s,%s\n",
+							this->operands[1], this->operands[0]
+							);
+				else if ( this->offsets[0] != 0 && this->offsets[1] == 0 )
+					fprintf ( stream, "\tcmpl\t%d(%s),%s\n",
+							this->offsets[0], this->operands[0], this->operands[1]
+							);
+				else if ( this->offsets[0] == 0 && this->offsets[1] != 0 )
+					fprintf ( stream, "\tcmpl\t%s,%d(%s)\n",
+							this->operands[0], this->offsets[1], this->operands[1]
+							);
+				break;
+			case SETL:
+				if ( this->offsets[0] == 0 )
+					fprintf ( stream, "\tmov\t %s, #0\t\n\tmovlt\t %s, #1\n", this->operands[0], this->operands[0] );
+				else
+					fprintf ( stream, "ERROR: TODO\tsetl\t%d(%s)\n",
+							this->offsets[0], this->operands[0]
+							);
+				break;
+			case SETG:
+				if ( this->offsets[0] == 0 )
+					fprintf ( stream, "\tmov\t %s, #0\t\n\tmovgt\t %s, #1\n", this->operands[0], this->operands[0] );
+				else
+					fprintf ( stream, "ERROR: TODO\tsetg\t%d(%s)\n",
+							this->offsets[0], this->operands[0]
+							);
+				break;
+			case SETLE:
+				if ( this->offsets[0] == 0 )
+					fprintf ( stream, "\tmov\t %s, #0\t\n\tmovle\t %s, #1\n", this->operands[0], this->operands[0] );
+				else
+					fprintf ( stream, "ERROR: TODO\tsetle\t%d(%s)\n",
+							this->offsets[0], this->operands[0]
+							);
+				break;
+			case SETGE:
+				if ( this->offsets[0] == 0 )
+					fprintf ( stream, "\tmov\t %s, #0\t\n\tmovge\t %s, #1\n", this->operands[0], this->operands[0] );
+				else
+					fprintf ( stream, "ERROR: TODO\tsetge\t%d(%s)\n",
+							this->offsets[0], this->operands[0]
+							);
+				break;
+			case SETE:
+				if ( this->offsets[0] == 0 )
+					fprintf ( stream, "\tmov\t %s, #0\t\n\tmoveq\t %s, #1\n", this->operands[0], this->operands[0] );
+				else
+					fprintf ( stream, "ERROR: TODO\tsete\t%d(%s)\n",
+							this->offsets[0], this->operands[0]
+							);
+				break;
+			case SETNE:
+				if ( this->offsets[0] == 0 )
+					fprintf ( stream, "\tmov\t %s, #0\t\n\tmovne\t %s, #1\n", this->operands[0], this->operands[0] );
+				else
+					fprintf ( stream, "ERROR: TODO\tsetnq\t%d(%s)\n",
+							this->offsets[0], this->operands[0]
+							);
+				break;
+
+			case CALL: case SYSCALL:
+				fprintf ( stream, "\tbl\t" );
+				if ( this->opcode == CALL )
+					fputc ( '_', stream );
+				fprintf ( stream, "%s\n", this->operands[0] );
+				break;
+			case LABEL: 
+				fprintf ( stream, "_%s:\n", this->operands[0] );
+				break;
+
+			case JUMP:
+				fprintf ( stream, "\tb\t%s\n", this->operands[0] );
+				break;
+			case JUMPZERO:
+				fprintf ( stream, "\tbeq\t%s\n", this->operands[0] ); // Same as equal on ARM  (?)
+				break;
+			case JUMPEQ:
+				fprintf ( stream, "\tbeq\t%s\n", this->operands[0] );
+				break;
+			case JUMPNONZ:
+				fprintf ( stream, "\tbne\t%s\n", this->operands[0] );// Same as !zero on ARM  (?)
+				break;
+
+			case LEAVE: 
+				// Same as "leave"
+				fprintf ( stream, "\tmov\tsp, fp\n");
+				fprintf ( stream, "\tpop\t{fp}\n");
+				break;
+			case RET:   
+				fprintf ( stream, "\tpop\t{pc}\n");
+				break;
+
+			case STRING:
+				fprintf ( stream, "%s\n", this->operands[0] );
+				break;
+
+			case COMMMENT:
+				fprintf ( stream, "#%s", this->operands[0] );
+				break;
+
+			case NIL:
+				break;
+
+			default:
+				fprintf ( stderr, "Error in instruction stream\n" );
+				break;
+		}
+		this = this->next;
+
+	}
 }
 
