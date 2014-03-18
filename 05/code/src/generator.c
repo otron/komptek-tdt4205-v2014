@@ -236,8 +236,9 @@ void gen_DECLARATION_STATEMENT (node_t *root, int scopedepth)
 	//(because VSL doesn't make any guarantees about the value of un-initialized variables
 	//or so the recitation slides say)
 	// it should work like this because parameters are visited before 
-	// local variables in the traversal, so stuff will end up in the right place by itself
-
+	// local variables in the traversal,
+	// also declaration statements for local variables are visited in-turn so the stack offset should match
+    // stuff should end up in the right place by itself
 
 	tracePrint("Ending DECLARATION\n");
 }
@@ -318,28 +319,44 @@ void gen_EXPRESSION ( node_t *root, int scopedepth )
 	
 	tracePrint ( "Starting EXPRESSION of type %s\n", (char*) root->expression_type.text);
 
-	node_t* expr_list; //gcc wouldn't let me put it inside the case :(
+	// by "currently only function calls", it's implied that method calls aren't covered yet, right?
+	node_t* expr_list; 
 	switch(root->expression_type.index){
 		case FUNC_CALL_E:
-			// check if there's an expression list amongst the children
-			for (int i = 0; i < root->n_children; i++) {
-				if (root->children[i] != NULL && root->children[i]->nodetype.index == EXPRESSION_LIST) {
-					expr_list = root->children[i];
-					break;
-				}
-			}
+			//now I know the recitation slides say that step 1 would be to push all the arguments
+			// but isn't this where the functions get called?
+			// so shouldn't we do all that stuff the caller has to do according to the recitation slides?
+			// haha no because we should just save the registers on the stack
+			// and what I've done is just put everything in r0 all the time
+			instruction_add(PUSH, r0, NULL, 0, 0);
+
+			// step 1: Push all the arguments
+			// this mean we are calling generate on the children of the expr_list-child, right?
+			if (root->n_children > 2)
+				return; // yeah I don't know how this would happen but I don't want it to
+			expr_list = root->children[1];
 			if (expr_list != NULL) {
-				// we've got arguments
-				// local variables are taken care of by declaration statements
-				// wait no we have to save the registers don't we
-				// shit, what?
-				// let's just push the arguments for now
 				for (int i = 0; i < expr_list->n_children; i++) {
-					//node_t* child = expr_list->children[i];
+					if (expr_list->children[i] != NULL) {
+						expr_list->children[i]->generate(expr_list->children[i], scopedepth);
+					}
 				}
 			}
-		
-	
+			// otherwise there are no arguments
+
+			// step 2: jump to the label
+			// the "label" is the function name with an underscore in front of it
+			// the function name is found in the first child of root
+			char* lbl = root->children[0]->label;
+			instruction_add(JUMP, lbl, NULL, 0, 0);
+			// remove parameters
+			if (expr_list != NULL) {
+				for (int i = 0; i < expr_list->n_children; i++) {
+					instruction_add(POP, r1, NULL, 0, 0);
+				}
+			}
+
+			instruction_add(PUSH, r0, NULL, 0, 0); // push return value onto stack
 
 		default:
 			break;
@@ -350,7 +367,7 @@ void gen_EXPRESSION ( node_t *root, int scopedepth )
 
 void gen_VARIABLE ( node_t *root, int scopedepth )
 {
-	
+
 	tracePrint ( "Starting VARIABLE\n");
 
 	if (root->nodetype.index != VARIABLE) {
@@ -360,7 +377,7 @@ void gen_VARIABLE ( node_t *root, int scopedepth )
 	// "Load from memory using stack offset from symbol table"
 	symbol_t* st = symbol_get(root->label);
 	// wait, load from memory? Into what? A register?
-   	// which register? What kind of rules govern this?
+	// which register? What kind of rules govern this?
 	// I am just going to put it in r0
 	instruction_add(LOAD, r0, fp, 0, st->stack_offset);
 	// how do we know what register it is in later?
@@ -381,59 +398,59 @@ void gen_CONSTANT (node_t * root, int scopedepth)
 
 	switch (root->data_type.base_type) {
 		case FLOAT_TYPE:
-		//	instruction_add(MOVE32, root->float_const, r0, 0, 0);
+			//	instruction_add(MOVE32, root->float_const, r0, 0, 0);
 			break;
 		case DOUBLE_TYPE:
 			// wait weren't all data types in VSL 4 bytes?
 			// which makes it weird that doubles are a thing because those are typically 8 bytes, right?
 			// idk man
-		//	instruction_add(MOVE32, root->double_const, r0, 0, 0);
+			//	instruction_add(MOVE32, root->double_const, r0, 0, 0);
 			break;
 		case INT_TYPE:
 			instruction_add(MOVE32, NULL, r0, root->int_const, 0);
 			break;
 		case BOOL_TYPE: ;
-			// I am assuming that the vsl stuff uses 0 for false
-			// and that anything that's not 0 is true
-			int val = 1;
-			if (root->bool_const == 0)
-				val = 0;
-			instruction_add(MOVE, r0, NULL, val, 0);
-			break;
+						// I am assuming that the vsl stuff uses 0 for false
+						// and that anything that's not 0 is true
+						int val = 1;
+						if (root->bool_const == 0)
+							val = 0;
+						instruction_add(MOVE, r0, NULL, val, 0);
+						break;
 		case STRING_TYPE: ;
-			// do that thing described in the recitation slides with STRINGX
-			// how do I do a lookup in the string table?
-			// oh node_t has a field called string_index
-			// that was easy
-			// or well, I have to pass ".STRING%i", string_index to instruction_add
-			// which is... less easy 
+						  // do that thing described in the recitation slides with STRINGX
+						  // how do I do a lookup in the string table?
+						  // oh node_t has a field called string_index
+						  // that was easy
+						  // or well, I have to pass ".STRING%i", string_index to instruction_add
+						  // which is... less easy 
 
-			// step 1: find the length of string_index in characters
-			int indexLength = 7; // lengthOf(".STRING") = 7
-			if (root->string_index != 0) // log10(0) is undefined and idk what it returns but it causes segfaults
-				indexLength += ((int) ceil(log10(root->string_index)));
-			
-			//step 2: allocate enough space for the string/char pointer
-			char* strArg = malloc(sizeof(char) * (indexLength+1));
-			// step 3: store the formatted string in strArg
-			sprintf(strArg, ".STRING%d", root->string_index); 
-			
-			instruction_add(MOVE32, strArg, r0, 0, 0);
+						  // step 1: find the length of string_index in characters
+						  int indexLength = 7; // lengthOf(".STRING") = 7
+						  if (root->string_index != 0) // log10(0) is undefined and idk what it returns but it causes segfaults
+							  indexLength += ((int) ceil(log10(root->string_index)));
 
-			// step 4: free memory used by strArg?
-			free(strArg);
-			break;
+						  //step 2: allocate enough space for the string/char pointer
+						  char* strArg = malloc(sizeof(char) * (indexLength+1));
+						  // step 3: store the formatted string in strArg
+						  sprintf(strArg, ".STRING%d", root->string_index); 
+
+						  instruction_add(MOVE32, strArg, r0, 0, 0);
+
+						  // step 4: free memory used by strArg?
+						  free(strArg);
+						  break;
 		case CLASS_TYPE:
-			// ???
-			break;
+						  // ???
+						  break;
 		case VOID_TYPE:
-			// ???
-			break;
+						  // ???
+						  break;
 		case ARRAY_TYPE:
-			// hm
-			break;
+						  // hm
+						  break;
 		default:
-			break;
+						  break;
 	}
 	// move constant to the top of the stack
 	instruction_add(PUSH, r0, NULL, 0, 0);
@@ -508,13 +525,13 @@ instructions_print ( FILE *stream )
 					fprintf ( stream, "\tmovw\t%s, #:lower16:%s\n",
 							this->operands[1], this->operands[0]+1
 							);
-				fprintf ( stream, "\tmovt\t%s, #:upper16:%s\n",
-						this->operands[1], this->operands[0]+1
-						);
-				break;
+					fprintf ( stream, "\tmovt\t%s, #:upper16:%s\n",
+							this->operands[1], this->operands[0]+1
+							);
+					break;
 				}
 				// if offsets are not 0
-				
+
 				fprintf (stream, "\tmovw\t%s, #:lower16:%i\n",
 						this->operands[1], this->offsets[0]);
 				fprintf (stream, "\tmovt\t%s, #:upper16:%i\n",
