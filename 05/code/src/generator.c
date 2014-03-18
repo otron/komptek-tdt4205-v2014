@@ -382,15 +382,14 @@ void gen_CONSTANT (node_t * root, int scopedepth)
 		case FLOAT_TYPE:
 		//	instruction_add(MOVE32, root->float_const, r0, 0, 0);
 			break;
-		case INT_TYPE:
-			//  INTs are 4bytes so we can just use MOV
-		//	instruction_add(MOVE32, root->int_const, r0, 0, 0);
-			break;
 		case DOUBLE_TYPE:
 			// wait weren't all data types in VSL 4 bytes?
 			// which makes it weird that doubles are a thing because those are typically 8 bytes, right?
 			// idk man
 		//	instruction_add(MOVE32, root->double_const, r0, 0, 0);
+			break;
+		case INT_TYPE:
+			instruction_add(MOVE32, NULL, r0, root->int_const, 0);
 			break;
 		case BOOL_TYPE: ;
 			// I am assuming that the vsl stuff uses 0 for false
@@ -487,7 +486,7 @@ instructions_print ( FILE *stream )
 				break;
 
 			case MOVE32:
-				if ( this->offsets[0] == 0 && this->offsets[1] == 0 ) 
+				if ( this->offsets[0] == 0 && this->offsets[1] == 0 ) {
 					/*
 					   snprintf(buff2, 100, "\tmovw	r0, #:lower16:%s", buff);
 					   instruction_add(STRING, STRDUP(buff2), NULL, 0,0);
@@ -501,14 +500,15 @@ instructions_print ( FILE *stream )
 						this->operands[1], this->operands[0]+1
 						);
 				break;
+				}
 				// if offsets are not 0
-				/*
+				
 				fprintf (stream, "\tmovw\t%s, #:lower16:%i\n",
 						this->operands[1], this->offsets[0]);
 				fprintf (stream, "\tmovt\t%s, #:upper16:%i\n",
 						this->operands[1], this->offsets[0]);
 
-				break; */
+				break; 
 			case MOVE:
 				if ( this->offsets[0] == 0 && this->offsets[1] == 0 )
 					fprintf ( stream, "\tmov\t%s, %s\n",
