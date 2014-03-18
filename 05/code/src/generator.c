@@ -367,6 +367,7 @@ void gen_VARIABLE ( node_t *root, int scopedepth )
 	// man this is weird
 	// wait are we supposed to push it onto the stack?
 	// like with constants?
+	instruction_add(POP, r0, NULL, 0, 0);
 
 	tracePrint ( "End VARIABLE %s, stack offset: %d\n", root->label, root->entry->stack_offset);
 }
