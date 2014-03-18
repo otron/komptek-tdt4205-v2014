@@ -505,6 +505,14 @@ void gen_RETURN_STATEMENT ( node_t *root, int scopedepth )
 
 	// so my code goes here, then? ok. Let's try that
 	// just gotta store the value returned by the expression in r0
+	// yeah we should just call generate on the child and then pop the stack into r0
+
+	node_t* child = root->children[0];
+	if (child != NULL) {
+		child->generate(child, scopedepth);
+		instruction_add(POP, r0, NULL, 0, 0);
+	}
+
 
 	tracePrint ( "End RETURN_STATEMENT\n");
 }
