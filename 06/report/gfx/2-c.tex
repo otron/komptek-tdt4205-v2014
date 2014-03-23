@@ -1,0 +1,34 @@
+% hurp a derp a tikz flow graph
+
+\tikzstyle{block} = [rectangle, draw, font=\ttfamily\small]
+\tikzstyle{arrow} = [draw, -latex']
+\tikzstyle{label} = [font=\fontshape{it}\selectfont] % labels are in italics
+
+\begin{tikzpicture}[node distance = 2cm, auto]
+	% code blocks
+	\node[block] (B1) 				{\makecell[l]{i = 0 \\c = - 4 \\d = b << 1}};
+	\node[block, below of=B1] (B2) 	{if i < n goto B3};
+	%	edge[arrow, bend right=45] (B1.east);
+	\node[block, below of=B2] (B3)	{\makecell[l]{c = c + 4 \\j = 0}};
+	\node[block, below of=B3] (B4)	{\makecell[l]{if j < m goto B5}};
+	\node[block, below of=B4] (B5)	{\makecell[l]{a = a + d \\j = j + i}};
+	\node[block, below of=B5] (B6)	{i = i + 1};
+	\node[block, below of=B6] (B7)	{ };
+	% labels
+	\node[label, left of=B1] 		{B1};
+	\node[label, left of=B2] 		{B2};
+	\node[label, left of=B3]		{B3};
+	\node[label, left of=B4]		{B4};
+	\node[label, left of=B5]		{B5};
+	\node[label, left of=B6]		{B6};
+	\node[label, left of=B7]		{B7};
+	% edges
+	\path	(B1)		edge	[arrow, bend right=0]	node	{}	(B2);
+	\path	(B2)		edge	[arrow]					node	{}	(B3);
+	\path	(B3)		edge	[arrow]					node	{}	(B4);
+	\path	(B4)		edge	[arrow]					node	{}	(B5);
+	\path	(B6.east)	edge	[arrow, bend right=45]	node	{}	(B2);
+	\path	(B2.east)	edge	[arrow, bend left=55]	node	{}	(B7.east);
+	\path	(B4.east)	edge	[arrow, bend left=30]	node	{}	(B6);
+	\path	(B5.west)	edge	[arrow, bend left=50]	node	{}	(B4.west);
+\end{tikzpicture}

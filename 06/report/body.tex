@@ -77,11 +77,9 @@ In the context of optimization, it is the replacement of ``expensive'' operation
 \begin{figure}[H]
 \centering
 	\input{gfx/2-b.tex}
-\label{fig:2-b}
 \caption{A three-address flow graph for the code in Problem 2.}
+\label{fig:2-b}
 \end{figure}
-
-
 
 \subsection{Optimize the flow graph by performing strength reduction on induction variables, and removing unnecessary induction variables.}
 % strength reduction on the induction variables
@@ -102,3 +100,10 @@ I did do code movement and pulled \texttt{d = b * 2} out of the loop body and al
 Also I replaced the multiplication in the assignment of \texttt{sum} with addition.
 % d = b << 1
 % i also did code motion
+
+\begin{figure}[H]
+\centering
+	\input{gfx/2-c.tex}
+\caption{An optimized version of the three-address flow graph in Figure~\ref{fig:2-b}.}
+\label{fig:2-c}
+\end{figure}
