@@ -38,3 +38,22 @@ Dead code elimination is when we remove statements whose effects are never obser
 E.g. if we've got two different assignments to the same variable without the variable ever being referenced in-between the two assignments, then we can remove the first assignment as its effect is never observed.
 
 This would remove \textit{B3.4}. 
+
+% problem 2
+\newpage
+\section{[More] Optimization}
+Consider the following C-code:
+\begin{lstlisting}[language=C, tabsize=4, basicstyle=\ttfamily\small]
+for (int i =0; i < n; i++) {
+	sum = 4 * i;
+	for (int j = 0; j < m; j = j + i) {
+		a = a + b * 2;
+	}
+}
+\end{lstlisting}
+
+\subsection{In the context of optimization, what is an induction variable, and what is reduction in strength?}
+
+\subsection{Convert the code above to a three-address flow graph.}
+
+\subsection{Optimize the flow graph by performing strength reduction on induction variables, and removing unnecessary induction variables.}
