@@ -107,3 +107,32 @@ Also I replaced the multiplication in the assignment of \texttt{sum} with additi
 \caption{An optimized version of the three-address flow graph in Figure~\ref{fig:2-b}.}
 \label{fig:2-c}
 \end{figure}
+
+% problem 3
+\newpage
+\section{Data-flow analysis}
+\subsection{In the context of reaching definition analysis, what does it mean for a definition to reach a point in the code?}
+% I guess it's time to read 9.2 of DB
+% pg 598: a variable may be defined by one of [some number of points in the code]. The definitions that may reach a program point along some path are known as reaching definitions.
+% So if we're at some point X in the code, then all the definitions at points that might be included in the path to X are reaching definitions? ok I think I got that
+% ooh so if the set of reaching definitions for variable x only has one member at a point Y then we can replace x by that definition at point Y (constant folding!)
+If a definition for some variable $x$ reaches a point $p$ in the code, then there exists a path from the definition to $p$ on which there are no other definitions of $x$.
+The definitions need not be constants ($x$ could be assigned another variable, for instance).
+However if there is only one reaching definition for $x$ at a point right before $x$ is referenced then it's possible to replace $x$ with that definition.
+If the definition is a constant it's called \emph{constant folding}.
+If it's a variable it is called \emph{copy propagation}.
+
+\subsection{Perform reaching definitions data-flow analysis by computing the \emph{gen, kill}, IN and OUT sets for each block of the flow graph above.}
+% IN[s] = data-flow values before statement s
+% OUT[s] = data-flow values after statement s
+% data-flow value = abstract representation of the set of all possible program states that can be observed for a given point/statement
+
+% transfer function of definition d: u = v + w (i.e. d is a definition of u)
+% f_d(x) = gen_d \union (x - kill_d)
+%	gen_d = {d}, kill_d = all other definitions of u in the program
+% the fuck is x, though? Is it a point?
+\paragraph{B1}
+$\{d_1,~d_2,~d_3\}$
+
+
+\subsection{Explain how a compiler can use the results to determine that the variable \texttt{b} must be a constant at the start of the exit node.}
