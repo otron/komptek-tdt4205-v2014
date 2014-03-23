@@ -11,7 +11,7 @@
 	%	edge[arrow, bend right=45] (B1.east);
 	\node[block, below of=B2] (B3)	{\makecell[l]{c = 4 * i\\j = 0}};
 	\node[block, below of=B3] (B4)	{\makecell[l]{if j < m goto B5}};
-	\node[block, below of=B4] (B5)	{\makecell[l]{d = b * 2 \\a = a + b \\j = j + i}};
+	\node[block, below of=B4] (B5)	{\makecell[l]{d = b * 2 \\a = a + d \\j = j + i}};
 	\node[block, below of=B5] (B6)	{i = i + 1};
 	\node[block, below of=B6] (B7)	{ };
 	% labels
@@ -27,8 +27,8 @@
 	\path	(B2)		edge	[arrow]					node	{}	(B3);
 	\path	(B3)		edge	[arrow]					node	{}	(B4);
 	\path	(B4)		edge	[arrow]					node	{}	(B5);
-	\path	(B5)		edge	[arrow]					node	{}	(B6);
 	\path	(B6.east)	edge	[arrow, bend right=45]	node	{}	(B2);
 	\path	(B2.east)	edge	[arrow, bend left=55]	node	{}	(B7.east);
-	\path	(B4.east)	edge	[arrow, bend right=50]	node	{}	(B2);
+	\path	(B4.east)	edge	[arrow, bend left=30]	node	{}	(B6);
+	\path	(B5.west)	edge	[arrow, bend left=50]	node	{}	(B4.west);
 \end{tikzpicture}
