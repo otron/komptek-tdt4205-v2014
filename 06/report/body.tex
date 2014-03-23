@@ -1,9 +1,40 @@
 % problem 1
 \section{Optimization}
+Explain each of the following optimizations and show how they can be used to improve the three-address flow graph.
+Start with the original flow graph for each case.
+
+\emph{Note: I use ``Bn.m'' to refer to line m in block n of the original flow graph.}
 \subsection{Common subexpression elimination}
+% CU lecture 23
+% DB pg 588
+From \textsc{the Dragon Book}, page 588:
+\begin{quote}
+``An occurrence of an expression \emph{E} is called a common subexpression if \emph{E} was previously computed and the values of the variables in \emph{E} have not changed since the previous computation.''
+\end{quote}
+
+You'd think \textit{B3.6} contains a common subexpression, since \texttt{i + t} is also computed at \textit{B3.2}.
+However \textit{B3.2} changes the value of \texttt{i}, so while the expression in \textit{B3.6} was previously computed, the values of the variables have changed and therefore it is not a common subexpression.
 
 \subsection{Copy propagation}
+% CU lecture 23
+% DB pg 590
+``After an assignment, \texttt{x = y}, replace references to \texttt{x} with \texttt{y} until \texttt{x} is assigned something else.''
+In this quote, taken from the 23rd CU lecture slides, \texttt{y} probably denotes a variable rather than an expression.
+
+This optimization would change \textit{B3.5} to \texttt{d = i + 2}.
+
+You'd think we should also change \textit{B3.2} to \texttt{i = 1 + t}, because of the assignment in \textit{B1.1}, but doing so would gunk up the code because control can enter \textit{B3} through more than one path ($\mathit{B1} \rightarrow \mathit{B2} \rightarrow \mathit{B3}$ and $\mathit{B3} \rightarrow \mathit{B2} \rightarrow \mathit{B3}$).
 
 \subsection{Code motion}
+% DB pg 592
+This is when we move the evaluation of a statement that doesn't change over time out of the body of the loop so that it's only computed once rather than once per iteration of the loop.
+
+This optimization would move \textit{B3.1} and \textit{B3.4} to \textit{B1}.
 
 \subsection{Dead code elimination}
+% DB pg 591
+
+Dead code elimination is when we remove statements whose effects are never observed in the code.
+E.g. if we've got two different assignments to the same variable without the variable ever being referenced in-between the two assignments, then we can remove the first assignment as its effect is never observed.
+
+This would remove \textit{B3.4}. 
