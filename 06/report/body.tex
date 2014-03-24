@@ -19,7 +19,7 @@ However \textit{B3.2} changes the value of \texttt{i}, so while the expression i
 % CU lecture 23
 % DB pg 590
 ``After an assignment, \texttt{x = y}, replace references to \texttt{x} with \texttt{y} until \texttt{x} is assigned something else.''
-In this quote, taken from the 23rd CU lecture slides, \texttt{y} probably denotes a variable rather than an expression.
+In this quote, taken from the 23rd CU lecture slides, \texttt{y} probably denotes a variable rather than an expression as replacing a variable with an expression would muck up the three-address code format.
 
 This optimization would change \textit{B3.5} to \texttt{d = i + 2}.
 
@@ -162,6 +162,10 @@ It's from page 605 of \textsc{BOOK OF DRAGONS}.
 Also
 $$\OUT{ENTRY} = \emptyset$$
 
+In addition I'd guess $gen(\text{EXIT})$ and $kill(\text{EXIT})$ are undefined or whatever because with this definition of OUT,
+computing \OUT{EXIT} doesn't make much sense since it's dependent on both $gen(\text{EXIT})$ and $kill(\text{EXIT})$ and the EXIT block itself is empty so...
+oh, wait, I guess that means that $\OUT{EXIT} = \emptyset \cup (\IN{EXIT} - \emptyset) = \IN{EXIT}$.
+
 An algorithm for computing the IN and OUT sets for the blocks of a CFG can be found in Figure 9.14 on page 607 of \textsc{You know which book}.
 That's the one I used to figure out the values seen in Table~\ref{tab:3-b-1}~through~\ref{tab:3-b-3}.
 Well actually I stopped once I saw that \OUT{B1} was unchanged between Step 2 and 3, because the algorithm does say we should stop when there are no more changes to any OUT and since the OUT set of a block depends on its IN set which depends on the OUT set of its immediate predecessors I figured we wouldn't be seeing any more changes due to how the graph looks.
@@ -238,7 +242,7 @@ $kill(\text{B5}) = \{d_1,~ d_3,~ d_5,~ d_{10},~ d_{11},~ d_{12}\}$
 
 \subsection{Explain how a compiler can use the results to determine that the variable \texttt{b} must be a constant at the start of the exit node.}
 Oh, I forgot to compute \IN{EXIT} and \OUT{EXIT}.
-Well I guess \OUT{EXIT} is either the empty set or equal to \IN{EXIT} depending on the program\footnote{for instance, if the CFG we're looking at is the entirety of the program then \OUT{EXIT} is the empty set unless some other program snatches the memory of this program and uses the same variables but if it's just a function or something inside a program then it might not be.}, but luckily I don't have to deal with that right now because the question asks about the value of a variable at the start of the EXIT node. \emph{Phew}.
+Well $\IN{EXIT} = \OUT{B5}$.
 
 \IN{EXIT} is computed the same way as any other IN set which, in our case, means it's equal to \OUT{B5}.
 Looking at \OUT{B5} in Table~\ref{tab:3-b-3} reveals that it contains two definitions for the variable \texttt{b}: $d_6$ and $d_8$.
