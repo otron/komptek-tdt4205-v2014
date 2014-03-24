@@ -131,8 +131,96 @@ If it's a variable it is called \emph{copy propagation}.
 % f_d(x) = gen_d \union (x - kill_d)
 %	gen_d = {d}, kill_d = all other definitions of u in the program
 % the fuck is x, though? Is it a point?
-\paragraph{B1}
-$\{d_1,~d_2,~d_3\}$
 
+%anyway, gen(Block) is the set of all definitions that reach the end of the block, yeah?
+% Definitions of gen and kill for basic blocks on pg 605 of DB
+% kill(Block) is the union of all the definitions killed by the individual statements
+% gen(Block) contains all the definitions inside the block that are "visible" immediately after the block -- we refer to them as 'downwards exposed'.
+%	a definition is downward exposed if it is not overwritten by another definition below it
 
+% so I just need to figure out what IN[Block] and OUT[Block] is
+%pg 606:
+% OUT[B] = gen(B) U (IN[B] - kill(B))
+% IN[B]  = U_P OUT[P]
+% the last one means that IN[B] is equal to the union of the OUT sets of blocks P that are direct predecessors of B
+
+% I just learned how to do this!
+\newcommand{\IN}[1]{\text{IN[#1]}}
+\newcommand{\OUT}[1]{\text{OUT[#1]}}
+
+So $gen(\text{B})$ is the set of all definitions inside block B that reach the end of the block and $kill(\text{B})$ is the union of all the definitions killed by the individual statements in the block.
+Note that according to Figure 9.13 on page 604 it would seem that the domain of $kill(\text{B}$ is all definitions in the program (or CFG, whichever).
+
+IN[B] and OUT[B] are defined as
+$$\OUT{B} = gen(B) \cup (\IN{B} - kill(B))$$
+$$\IN{B} = \bigcup_{P}\OUT{P}$$
+Where P is a predecessor block of B and I'm guessing the big cup thing is supposed to be like a sum except instead of addition it performs union?
+It's from page 605 of \textsc{BOOK OF DRAGONS}.
+
+Also
+$$\OUT{ENTRY} = \emptyset$$
+
+An algorithm for computing the IN and OUT sets for the blocks of a CFG can be found in Figure 9.14 on page 607 of \textsc{You know which book}.
+That's the one I used to answer this.
+
+% man I am pretty lazy
+\newcommand{\blockn}{B1}
+\subsubsection{\blockn}
+$gen(\text{\blockn}) = \{d_1,~d_2,~d_3\}$
+
+$kill(\text{\blockn}) = \{d_5, ~d_{10}, ~d_6, ~d_8, ~d_{11}, ~d_{12}\}$
+
+$\IN{\blockn} = $
+
+$\OUT{\blockn} = $
+
+\renewcommand{\blockn}{B2}
+\subsubsection{\blockn}
+$gen(\text{\blockn}) = \{d_4,~d_5\}$
+
+$kill(\text{\blockn}) = \{d_1,~ d_{10}\}$
+
+$\IN{\blockn} = $
+
+$\OUT{\blockn} = $
+
+\renewcommand{\blockn}{B3}
+\subsubsection{\blockn}
+$gen(\text{\blockn}) = \{d_6,~ d_7\}$
+
+$kill(\text{\blockn}) = \{d_2,~ d_8\}$
+
+$\IN{\blockn} = $
+
+$\OUT{\blockn} = $
+
+\renewcommand{\blockn}{B4}
+\subsubsection{\blockn}
+$gen(\text{\blockn}) = \{d_8,~ d_9\}$
+
+$kill(\text{\blockn}) = \{d_2,~ d_8\}$
+
+$\IN{\blockn} = $
+
+$\OUT{\blockn} = $
+
+\renewcommand{\blockn}{B5}
+\subsubsection{\blockn}
+$gen(\text{\blockn}) = \{d_{10},~ d_{12}\}$
+
+$kill(\text{\blockn}) = \{d_{10},~ d_{12}\}$
+
+$\IN{\blockn} = $
+
+$\OUT{\blockn} = $
+
+\renewcommand{\blockn}{EXIT}
+\subsubsection{\blockn}
+$gen(\text{\blockn}) = \emptyset$
+
+$kill(\text{\blockn}) = \emptyset$
+
+$\IN{\blockn} = $
+
+$\OUT{\blockn} = ?$
 \subsection{Explain how a compiler can use the results to determine that the variable \texttt{b} must be a constant at the start of the exit node.}
