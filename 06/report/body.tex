@@ -237,3 +237,12 @@ $kill(\text{B5}) = \{d_1,~ d_3,~ d_5,~ d_{10},~ d_{11},~ d_{12}\}$
 
 
 \subsection{Explain how a compiler can use the results to determine that the variable \texttt{b} must be a constant at the start of the exit node.}
+Oh, I forgot to compute \IN{EXIT} and \OUT{EXIT}.
+Well I guess \OUT{EXIT} is either the empty set or equal to \IN{EXIT} depending on the program\footnote{for instance, if the CFG we're looking at is the entirety of the program then \OUT{EXIT} is the empty set unless some other program snatches the memory of this program and uses the same variables but if it's just a function or something inside a program then it might not be.}, but luckily I don't have to deal with that right now because the question asks about the value of a variable at the start of the EXIT node. \emph{Phew}.
+
+\IN{EXIT} is computed the same way as any other IN set which, in our case, means it's equal to \OUT{B5}.
+Looking at \OUT{B5} in Table~\ref{tab:3-b-3} reveals that it contains two definitions for the variable \texttt{b}: $d_6$ and $d_8$.
+That means \texttt{b} could have either of these definitions as we reach the EXIT node.
+But hey, \emph{wait a minute}, both $d_6$ and $d_8$ define \texttt{b} as a constant!
+So that's how we know that the variable \texttt{b} must be a constant at the start of the exit node.
+We don't know exactly \emph{which} constant it'll be, but it's either 5 or 4 which, y'know, is a smaller set than $\mathbb{Z}_{0}^{2^{32}-1}$ (or whatever, I don't know the type of \texttt{b}).
