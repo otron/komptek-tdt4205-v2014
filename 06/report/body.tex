@@ -177,7 +177,6 @@ Yeah that's a rather convoluted explanation but I'm sure you know how it's suppo
 % so if you want the first occurrence of it to be n, you have to set it to n-1
 \subsubsection{\emph{gen} and \emph{kill} sets}
 
-\newcommand{\blockn}{B1}
 $gen(\text{B1}) = \{d_1,~d_2,~d_3\}$
 
 $kill(\text{B1}) = \{d_5, ~d_6, ~d_8, ~d_{10}, ~d_{11}, ~d_{12}\}$
@@ -255,7 +254,7 @@ We don't know exactly \emph{which} constant it'll be, but it's either 5 or 4 whi
 % problem 4
 \section{Register allocation}
 Consider the three address code:
-\begin{lstlisting}[language=C, tabsize=4, basicstyle=\ttfamily\small]
+\begin{lstlisting}[language=C, tabsize=2, basicstyle=\ttfamily\small, numbers=left, numberstyle=\small\color{gray}]
 	a = b + c
 	d = a + b
 	e = 2 * a
@@ -265,9 +264,84 @@ Consider the three address code:
 \end{lstlisting}
 
 \subsection{In the context of live variable analysis, what does it mean for a variable to be \emph{live} at a point in the code?}
+% 9.2.5 Live-Variable Analysis, starts on pg 608
+% In live variable analysis, we wish to know for a variable x and point p whether the value of x at p could be used along some path in the flow graph starting at p.
+% if so, we say that x is live at p, otherwise, x is dead at p.
+If a variable $x$ is live at a point $p$, then its value could be used (i.e. read before being assigned anew) along some path in the flow graph starting at $p$.
 
 \subsection{Perform live variable analysis on the code above.}
+% uh
+% def_B = the set of variables defined (assigned values) in block B prior to any use of that variable in B
+% use_B = the set of variables whose values may be used in B prior to any definition of the variable
+% uh, the book says that any variable in use_B must be considered live on entrance to block B 
+%  while any variable in def_B are definately dead at the beginning of B.
+% which would mean that variables can be both dead and live at the beginning of B? what?
+% oh no according to the definition of IN[B], membership in use_B has precedence over def_B
 
+% IN[B] = set of variables live on entry from block B
+% OUT[B]= set of variables live on exit from block B
+Am I supposed to treat the entire code segment as a basic block?
+Or should I treat each as a basic block?
+Or should I make up some scheme to divide the lines into basic blocks?
+
+If I just assume the entire segment is one basic block B then $\IN{B} = \{a,~b,~c,~d,~e\}$ and $\OUT{B} = \emptyset$.
+And that doesn't really tell us much.
+So let's do it line-by-line instead, ait?
+Cool.
+Well not \emph{cool}, it's going to take a bunch of time since I'm doing it by hand and I have to tabulate the results as well.
+But cool, as in OK.
+
+I'm treating each line as a basic block where block $n$ contains line $n$.
+E.g. block 1 contains the statement \texttt{a = b + c}.
+
+
+And for this answer I'd like to extend thanks to Algorithm 9.14 on page 610.
+You know which book it's in.
+
+\setcounter{subsubsection}{-1} % counters are apparently inserted as ++counter
+\subsubsection{\emph{def} and \emph{use}}
+\begin{table}[H]
+\centering
+\begin{tabular}{lcc}
+	\toprule
+	\textsc{Block}	& $use_b$	& $def_b$	\\
+	\midrule
+%	point	  use		  def 
+	ENTRY	& 			&			\\
+	1		& b, c		& a 		\\
+	2		& a, b		& d			\\
+	3		& a			& e			\\
+	4		& c, e		& a			\\
+	5		& a, d		& b			\\
+	6		& e			& c			\\
+	\bottomrule
+\end{tabular}
+\caption{\emph{def} and \emph{use} for the code segment in Problem 4.}
+\label{tab:4-b-0}
+\end{table}
+
+% oh man can I just reuse the table template I made for problem 3?
+% I think I can!
+% Whooo!
+% Well almost, I need to copy it and add a line due to a mismatch in the number of blocks
+\subsubsection{Iteration one}
+\newcommand{\INBe}			{b, c}
+\newcommand{\OUTBe}			{b, c}
+\renewcommand{\INBone}		{b, c}
+\renewcommand{\OUTBone}		{a, b}
+\renewcommand{\INBtwo}		{a, b}
+\renewcommand{\OUTBtwo}		{a, d}
+\renewcommand{\INBthree}	{a, d}
+\renewcommand{\OUTBthree}	{a, d}
+\renewcommand{\INBfour}		{a, d}
+\renewcommand{\OUTBfour}	{a, d, e}
+\renewcommand{\INBfive}		{a, d, e}
+\renewcommand{\OUTBfive}	{e}
+\newcommand{\INBsix}		{e}
+\newcommand{\OUTBsix}		{$\emptyset$}
+\input{3-b-table-template.tex}
+
+Since there's only one possible path for control to flow in the code segment for this problem, one iteration of Algorithm 9.14 is enough.
 \subsection{Draw the register interference graph for the code above.}
 
 \subsection{How many registers are needed to avoid register spills for the above code (assuming a hardware architecture capable of three-address code (e.g. ARM))?}
