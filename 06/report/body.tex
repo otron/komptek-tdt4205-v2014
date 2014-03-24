@@ -163,11 +163,14 @@ Also
 $$\OUT{ENTRY} = \emptyset$$
 
 An algorithm for computing the IN and OUT sets for the blocks of a CFG can be found in Figure 9.14 on page 607 of \textsc{You know which book}.
-That's the one I used to answer this.
+That's the one I used to figure out the values seen in Table~\ref{tab:3-b-1}~through~\ref{tab:3-b-3}.
+Well actually I stopped once I saw that \OUT{B1} was unchanged between Step 2 and 3, because the algorithm does say we should stop when there are no more changes to any OUT and since the OUT set of a block depends on its IN set which depends on the OUT set of its immediate predecessors I figured we wouldn't be seeing any more changes due to how the graph looks.
+Yeah that's a rather convoluted explanation but I'm sure you know how it's supposed to work.
 
 % man I am pretty lazy
 \renewcommand\thesubsubsection{Step \arabic{subsubsection}}
-\setcounter{subsubsection}{-1}
+\setcounter{subsubsection}{-1} % counters are apparently inserted as ++counter
+% so if you want the first occurrence of it to be n, you have to set it to n-1
 \subsubsection{\emph{gen} and \emph{kill} sets}
 
 \newcommand{\blockn}{B1}
@@ -209,7 +212,7 @@ $kill(\text{B5}) = \{d_1,~ d_3,~ d_5,~ d_{10},~ d_{11},~ d_{12}\}$
 
 \subsubsection{Second iteration}
 % can't use the values from the last step because LaTeX sees the re-definition of the commands
-% before it sees their usage
+% before it sees their usage and apparently does lazy evaluation so the command inside the command isn't executed before the command is used, not when it is defined
 % which, when you think about it, shouldn't be too surprising
 % I guess I just wanted the compiler to know what I was thinking IS THAT TOO MUCH TO ASK
 % HUH
@@ -221,9 +224,16 @@ $kill(\text{B5}) = \{d_1,~ d_3,~ d_5,~ d_{10},~ d_{11},~ d_{12}\}$
 \renewcommand{\OUTBthree}	{$\{d_3,~ d_4,~ d_5,~ d_6,~ d_7,~ d_9\}$}
 \renewcommand{\INBfour}		{\OUTBtwo}
 \renewcommand{\OUTBfour}	{$\{d_3,~ d_4,~ d_5,~ d_7,~ d_8,~ d_9\}$}
-\renewcommand{\INBfive}		{$\{d}
-\renewcommand{\OUTBfive}	{}
+\renewcommand{\INBfive}		{$\{d_3,~ d_4,~ d_5,~ d_6,~ d_7,~ d_8,~ d_9\}$}
+\renewcommand{\OUTBfive}	{$\{d_4,~ d_6,~ d_7,~ d_8,~ d_9,~ d_{10},~ d_{12}\}$}
 
 \input{2-b-table-template.tex}
+
+\subsubsection{Third iteration}
+\renewcommand{\INBone}		{$\{d_4,~ d_6,~ d_7,~ d_8,~ d_9,~ d_{10},~ d_{12}\}$}
+\renewcommand{\OUTBone}		{$\{d_1,~ d_2,~ d_3,~ d_4,~ d_7,~ d_9\}$}
+
+\input{2-b-table-template.tex}
+
 
 \subsection{Explain how a compiler can use the results to determine that the variable \texttt{b} must be a constant at the start of the exit node.}
