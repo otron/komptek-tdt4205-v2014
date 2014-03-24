@@ -246,3 +246,24 @@ That means \texttt{b} could have either of these definitions as we reach the EXI
 But hey, \emph{wait a minute}, both $d_6$ and $d_8$ define \texttt{b} as a constant!
 So that's how we know that the variable \texttt{b} must be a constant at the start of the exit node.
 We don't know exactly \emph{which} constant it'll be, but it's either 5 or 4 which, y'know, is a smaller set than $\mathbb{Z}_{0}^{2^{32}-1}$ (or whatever, I don't know the type of \texttt{b}).
+
+
+% problem 4
+\section{Register allocation}
+Consider the three address code:
+\begin{lstlisting}[language=C, tabsize=4, basicstyle=\ttfamily\small]
+	a = b + c
+	d = a + b
+	e = 2 * a
+	a = e + c
+	b = d + a
+	c = e - 2
+\end{lstlisting}
+
+\subsection{In the context of live variable analysis, what does it mean for a variable to be \emph{live} at a point in the code?}
+
+\subsection{Perform live variable analysis on the code above.}
+
+\subsection{Draw the register interference graph for the code above.}
+
+\subsection{How many registers are needed to avoid register spills for the above code (assuming a hardware architecture capable of three-address code (e.g. ARM))?}
