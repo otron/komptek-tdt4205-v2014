@@ -143,6 +143,8 @@ If it's a variable it is called \emph{copy propagation}.
 % OUT[B] = gen(B) U (IN[B] - kill(B))
 % IN[B]  = U_P OUT[P]
 % the last one means that IN[B] is equal to the union of the OUT sets of blocks P that are direct predecessors of B
+% "A - B" is the set of elements that are in A but not in B
+% A U \emptyset = A
 
 % I just learned how to do this!
 \newcommand{\IN}[1]{\text{IN[#1]}}
@@ -164,63 +166,64 @@ An algorithm for computing the IN and OUT sets for the blocks of a CFG can be fo
 That's the one I used to answer this.
 
 % man I am pretty lazy
+\renewcommand\thesubsubsection{Step \arabic{subsubsection}}
+\setcounter{subsubsection}{-1}
+\subsubsection{\emph{gen} and \emph{kill} sets}
+
 \newcommand{\blockn}{B1}
-\subsubsection{\blockn}
-$gen(\text{\blockn}) = \{d_1,~d_2,~d_3\}$
+$gen(\text{B1}) = \{d_1,~d_2,~d_3\}$
 
-$kill(\text{\blockn}) = \{d_5, ~d_{10}, ~d_6, ~d_8, ~d_{11}, ~d_{12}\}$
+$kill(\text{B1}) = \{d_5, ~d_6, ~d_8, ~d_{10}, ~d_{11}, ~d_{12}\}$
 
-$\IN{\blockn} = $
+$gen(\text{B2}) = \{d_4,~d_5\}$
 
-$\OUT{\blockn} = $
+$kill(\text{B2}) = \{d_1,~ d_{10}\}$
 
-\renewcommand{\blockn}{B2}
-\subsubsection{\blockn}
-$gen(\text{\blockn}) = \{d_4,~d_5\}$
+$gen(\text{B3}) = \{d_6,~ d_7\}$
 
-$kill(\text{\blockn}) = \{d_1,~ d_{10}\}$
+$kill(\text{B3}) = \{d_2,~ d_8\}$
 
-$\IN{\blockn} = $
+$gen(\text{B4}) = \{d_8,~ d_9\}$
 
-$\OUT{\blockn} = $
+$kill(\text{B4}) = \{d_2,~ d_6\}$
 
-\renewcommand{\blockn}{B3}
-\subsubsection{\blockn}
-$gen(\text{\blockn}) = \{d_6,~ d_7\}$
+$gen(\text{B5}) = \{d_{10},~ d_{12}\}$
 
-$kill(\text{\blockn}) = \{d_2,~ d_8\}$
+$kill(\text{B5}) = \{d_1,~ d_3,~ d_5,~ d_{10},~ d_{11},~ d_{12}\}$
 
-$\IN{\blockn} = $
+\subsubsection{First iteration}
+% whoo-hoo! this is like using variables or whatever and generating the text!
+% thug lyfe mofo
+\newcommand{\INBone}	{$\emptyset$}
+\newcommand{\OUTBone}	{$\{d_{1},~ d_2,~ d_3\}$}
+\newcommand{\INBtwo}	{\OUTBone}
+\newcommand{\OUTBtwo}	{$\{d_2,~ d_3,~ d_4,~ d_5\}$}
+\newcommand{\INBthree}	{\OUTBtwo}
+\newcommand{\OUTBthree}	{$\{d_3,~ d_4,~ d_5,~ d_6,~ d_7\}$}
+\newcommand{\INBfour}	{\OUTBtwo}
+\newcommand{\OUTBfour}	{$\{d_3,~ d_4,~ d_5,~ d_8,~ d_9\}$}
+\newcommand{\INBfive}	{$\{d_3,~ d_4,~ d_5,~ d_6,~ d_7,~ d_8,~ d_9\}$}
+\newcommand{\OUTBfive}	{$\{d_1,~ d_4,~ d_6,~ d_7,~ d_8,~ d_9,~ d_{10},~ d_{12}\}$}
 
-$\OUT{\blockn} = $
+\input{2-b-table-template.tex}
 
-\renewcommand{\blockn}{B4}
-\subsubsection{\blockn}
-$gen(\text{\blockn}) = \{d_8,~ d_9\}$
+\subsubsection{Second iteration}
+% can't use the values from the last step because LaTeX sees the re-definition of the commands
+% before it sees their usage
+% which, when you think about it, shouldn't be too surprising
+% I guess I just wanted the compiler to know what I was thinking IS THAT TOO MUCH TO ASK
+% HUH
+\renewcommand{\INBone}		{$\{d_1,~ d_4,~ d_6,~ d_7,~ d_8,~ d_9,~ d_{10},~ d_{12}\}$}
+\renewcommand{\OUTBone}		{$\{d_1,~ d_2,~ d_3,~ d_4,~ d_7,~ d_9\}$}
+\renewcommand{\INBtwo}		{\OUTBone}
+\renewcommand{\OUTBtwo}		{$\{d_2,~ d_3,~ d_4,~ d_5,~ d_7,~ d_9\}$}
+\renewcommand{\INBthree}	{\OUTBtwo}
+\renewcommand{\OUTBthree}	{$\{d_3,~ d_4,~ d_5,~ d_6,~ d_7,~ d_9\}$}
+\renewcommand{\INBfour}		{\OUTBtwo}
+\renewcommand{\OUTBfour}	{$\{d_3,~ d_4,~ d_5,~ d_7,~ d_8,~ d_9\}$}
+\renewcommand{\INBfive}		{$\{d}
+\renewcommand{\OUTBfive}	{}
 
-$kill(\text{\blockn}) = \{d_2,~ d_8\}$
+\input{2-b-table-template.tex}
 
-$\IN{\blockn} = $
-
-$\OUT{\blockn} = $
-
-\renewcommand{\blockn}{B5}
-\subsubsection{\blockn}
-$gen(\text{\blockn}) = \{d_{10},~ d_{12}\}$
-
-$kill(\text{\blockn}) = \{d_{10},~ d_{12}\}$
-
-$\IN{\blockn} = $
-
-$\OUT{\blockn} = $
-
-\renewcommand{\blockn}{EXIT}
-\subsubsection{\blockn}
-$gen(\text{\blockn}) = \emptyset$
-
-$kill(\text{\blockn}) = \emptyset$
-
-$\IN{\blockn} = $
-
-$\OUT{\blockn} = ?$
 \subsection{Explain how a compiler can use the results to determine that the variable \texttt{b} must be a constant at the start of the exit node.}
