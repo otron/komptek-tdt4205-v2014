@@ -1,0 +1,16 @@
+\tikzstyle{derp} = [circle, draw, font=\ttfamily\small]
+
+\begin{tikzpicture}[every node/.style={draw, circle, minimum size=0.75cm}]
+	\node				(a)		{a};
+	\node[right of=a]	(b)		{b};
+	\node[right of=b]	(c)		{c};
+	\node[below of=a]	(d)		{d};
+	\node[right of=d]	(e)		{e};
+
+	\path
+	(a) 	edge 	(b)
+			edge	(d)
+			edge	(e)
+	(b)		edge 	(c)
+	(d)		edge	(e);
+\end{tikzpicture}

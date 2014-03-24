@@ -342,6 +342,33 @@ You know which book it's in.
 \input{3-b-table-template.tex}
 
 Since there's only one possible path for control to flow in the code segment for this problem and it goes straight from ENTRY to EXIT, one iteration of Algorithm 9.14 is enough.
+
+
 \subsection{Draw the register interference graph for the code above.}
+% http://www.cs.cornell.edu/Courses/CS412/2008sp/lectures/lec33.pdf
+% make a graph containing one node for each variable in the code
+% For each IN and OUT set S from 4-b
+% draw an edge between the variables in S
+
+% time to bust out TikZ
+\begin{figure}[H]
+\centering
+\input{gfx/4-c.tex}
+\caption{The register interference graph for the code above.}
+\label{fig:4-c}
+\end{figure}
 
 \subsection{How many registers are needed to avoid register spills for the above code (assuming a hardware architecture capable of three-address code (e.g. ARM))?}
+The minimum number of registers required to avoid register spilling is smallest possible number of different colors needed to color the register interference graph.
+Since the graph is small we can attempt to 3-color\footnote{the number 3 was chosen randomly by fair dice roll} the graph and if we do we see that yes, there exists a solution.
+Check out Figure~\ref{fig:4-d} for the answer.
+
+\begin{figure}[H]
+\centering
+\input{gfx/4-d.tex}
+\caption{3-coloring of the register interference graph.}
+\label{fig:4-d}
+\end{figure}
+
+So: We need three registers in order to avoid register spills.
+Any number higher than three will also let us avoid register spills, but three is the smallest possible number of registers required.
