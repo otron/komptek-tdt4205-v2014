@@ -10,6 +10,7 @@
 	B4	& \INBfour	& \OUTBfour	\\
 	B5	& \INBfive	& \OUTBfive	\\
 \end{tabular}
-\label{tab:3-b-1}
 \caption{Status of the IN and OUT sets at the end of step \arabic{subsubsection}.}
+\label{tab:3-b-\arabic{subsubsection}} % man, LaTeX is /pretty cool/
+% this should allow me to reference the tables by the number of subsubsection they're in. Which is cool.
 \end{table}
