@@ -33,7 +33,7 @@ void transfer_children(Node_t* fromNode, Node_t* toNode) {
 
 Node_t* simplify_default ( Node_t *root, int depth )
 {
-	
+	// I am just going to assume that this one is ok.	
 	simplify_children(root, depth);
 	return root;
 }
@@ -132,6 +132,41 @@ Node_t *simplify_list ( Node_t *root, int depth )
 	// STEP 1: call simplify on all of root's children
 	simplify_children(root, depth);
 
+
+	// STEP 2:
+	// look at the type of the first child
+	node_t* child = root->children[0];
+	if (child == NULL)
+		return; //I do not want any segfaults please
+
+	// if the type of root is the same as the type of child we should make do with the simplification
+	// which is to say we should steal the children of child
+	if (child->nodetype.index == root->nodetype.index) {
+		// need to expand the children array of root to (root->n_children + child->n_children - 1)
+		int newsize = root->n_children + child->n_children - 1;
+		if (newsize == 0)
+			return;
+
+		node_t** oldChildren = root->children;
+		root->children = (node_t**) malloc(sizeof(node_t*) * newsize); // no segfaults
+
+		for (int i = 0; i < root->n_children - 1; i++) {
+			root->children[i] = oldChildren[i+1];
+			oldChildren[i] = NULL;
+		}
+		oldChildren[0] = NULL;
+		// no segfaults
+		free(oldChildren); // free the space we made for all those node_t* pointers
+		// no segfaults
+		// place the children of child in root->children
+		for (int i = root->n_children - 1, j = 0; j < child->n_children; i++, j++) {
+			root->children[i] = child->children[j];
+			child->children[j] = NULL;
+		}
+		// no segfaults
+
+
+	}
 	/*
 	// STEP 2: compare root's type to the type of its left child
 	// the fuck.
