@@ -1,0 +1,63 @@
+notes from the recitation lecture, 2014-03-24
+theory assignment covers 9.1, 9.2 and 8.8
+guess that means register allocation and spilling is covered in 8.8
+
+# Arithmetic
+> We're ignoring the fact that the result of a multiplication may be bigger than 32 bits
+	i.e. we're ignoring overflow for multiplication
+	also for everything. We're ignoring overflow.
+> SDIV == signed division
+
+# 4 bytes for booleans
+	0 for false, everything else as true
+	allows logical or and logical and to be implemented with addition and multiplication, respectively
+
+# Comparisons
+> CMP instruction compares two numbers and updates the status register
+> add gt, ge, lt, le, eg, ne as a suffix to an instruction to execute it conditionally based on the contents of the status register
+cmp 	r0, r1 	# compare r0 and r1
+mov 	r0, #0	# move 0 to r0
+movgt	r0, #1	# move 1 to r0 if last comparison resulted in "greater than"
+
+# Expressions!
+Leave the result of an expression on the top of the stack
+for binary expressions (expression with two operands), generate code for the left child and then generate code for the right child
+the operands will then be the top (right child) and second to top (left child) elements on the stack
+
+# floating points
+implementing floating point stuff just requires more typing
+it is conceptually identical to the integer stuff 'cept that you have to use different registers and instructions
+
+# Objects
+objects are implemented as references to dynamically allocated memory on the heap
+instantiation allocates space on the heap
+the value on the stack is a reference to the first allocated address on the heap
+
+# Classes!
+only have to generate assembly for the methods
+which is done just like functions
+except that the labeling scheme has to differentiate between methods and classes
+which we have to figure out
+e.g. _%CLASS_%METHOD:
+yeah why not
+
+# method calls
+have to pass a reference to the object on which the method is called as an additional argument
+i.e. object.method(a, b) => object.method(a, b, object)
+
+class field expressions or whatever (classname.field)
+look at the example
+
+# jumps and stuff
+psuedocode for if-else:
+	evaluate expression
+	compare to zero
+	jump to else-label if zero
+	code for if-part
+	jump to end-label
+else-label:
+	code for else-part
+end-label:
+	stuff post the if/else
+
+we need to figure out our own scheme for labeling for the if/else/while/whatever things
