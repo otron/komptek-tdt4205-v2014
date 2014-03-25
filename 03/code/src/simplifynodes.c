@@ -135,21 +135,68 @@ Node_t *simplify_list ( Node_t *root, int depth )
 
 	// STEP 2:
 	// look at the type of the first child
-	node_t* child = root->children[0];
-	if (child == NULL)
-		return; //I do not want any segfaults please
+	node_t* goblin = root->children[0]; // it's called goblin because "child" got confusing
+	if (goblin == NULL)
+		return root; //I do not want any segfaults please
 
-	// if the type of root is the same as the type of child we should make do with the simplification
-	// which is to say we should steal the children of child
-	if (child->nodetype.index == root->nodetype.index) {
+	// if the type of root is the same as the type of goblin we should make do with the simplification
+	// which is to say we should steal the children of goblin 
+	if (goblin->nodetype.index == root->nodetype.index) {
+		// ok cool, we're gonna steal the children of goblin 
+		// after we've done that we need to discard goblin
+		// if goblin has n children, root->children needs to be expanded to accomodate (root->n_children + n - 1)
+		int newSize = root->n_children + goblin->n_children - 1;
+		
+		if (newSize == 0)
+			return root; //what?
+		if (newSize == root->n_children) {
+			// this happens if goblin->n_children == 1
+			// we don't need to expand root->children, just replace goblin with goblin's only child
+			root->children[0] = goblin->children[0];
+			goblin->children[0] = NULL;
+			// we should probably finalize goblin now
+			// although I think that causes segfaults for some reason
+			node_finalize(goblin);
+
+		} else {
+			// sigh, we need to expand root->children
+			// now for some reason realloc(root->children, sizeof(node_t*) * newsize) segfaults
+			// OOH WAIT DOES IT SEGFAULT IF newsize == root->n_children? I SHOULD CHECK THAT OUT
+			// probably not gonna, though
+			node_t** new_generation; // array to holds the new number of children
+			new_generation = (node_t**) malloc(sizeof(node_t*) * newSize);
+
+			// ok so the children of goblin should come first in the new generation
+			int counter = 0;
+			for (; counter < goblin->n_children; counter++) {
+				new_generation[counter] = goblin->children[counter];
+				goblin->children[counter] = NULL; // so we can finalize goblin later
+				// when we are done with it
+				// without it mucking up our AST
+			}
+			// so counter should now be equal to the last index in the new_generation
+			// which means root's non-goblin children should take their place from counter+1 and upwards
+			counter++; 
+			for (int i = 1; counter < newSize && i < root->n_children; counter++) {
+				new_generation[counter] = root->children[i];
+				root->children[i] = NULL; // so we can free the empty space once we're done 
+			}
+			free(root->children); // this should free the memory space pointed to by root->children
+			root->children = new_generation; // join root with its new family
+			node_finalize(goblin);	// go away, foul goblin, we have no more need of your services
+		}
+
+
+		/*
 		// need to expand the children array of root to (root->n_children + child->n_children - 1)
 		int newsize = root->n_children + child->n_children - 1;
 		if (newsize == 0)
-			return;
+			return root;
 
 		node_t** oldChildren = root->children;
 		root->children = (node_t**) malloc(sizeof(node_t*) * newsize); // no segfaults
 
+		
 		for (int i = 0; i < root->n_children - 1; i++) {
 			root->children[i] = oldChildren[i+1];
 			oldChildren[i] = NULL;
@@ -164,6 +211,7 @@ Node_t *simplify_list ( Node_t *root, int depth )
 			child->children[j] = NULL;
 		}
 		// no segfaults
+		*/
 
 
 	}
