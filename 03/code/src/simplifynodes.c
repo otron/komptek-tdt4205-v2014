@@ -118,8 +118,14 @@ Node_t *simplify_list_with_null ( Node_t *root, int depth )
 		fprintf ( stderr, "%*cSimplify %s \n", depth, ' ', root->nodetype.text );
 
 	simplify_children(root, depth);
+	// should deal with declaration_list and function_list
+	// their grammar is like
+	// list := list element | nil
+	// but that doesn't really matter at this point:
+	// if the first child is NULL then we eliminate it and reduce the size of children by 1
+	// which we will do by moving the second child to the first child's place and then setting n_children to 1
+	node_t* goblin = root->children[0];
 	return root;
-
 }
 
 
