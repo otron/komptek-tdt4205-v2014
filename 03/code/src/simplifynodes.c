@@ -154,9 +154,6 @@ Node_t *simplify_list ( Node_t *root, int depth )
 			// we don't need to expand root->children, just replace goblin with goblin's only child
 			root->children[0] = goblin->children[0];
 			goblin->children[0] = NULL;
-			// we should probably finalize goblin now
-			// although I think that causes segfaults for some reason
-			node_finalize(goblin);
 
 		} else {
 			// sigh, we need to expand root->children
@@ -177,14 +174,23 @@ Node_t *simplify_list ( Node_t *root, int depth )
 			// so counter should now be equal to the last index in the new_generation
 			// which means root's non-goblin children should take their place from counter+1 and upwards
 			counter++; 
-			for (int i = 1; counter < newSize && i < root->n_children; counter++) {
+			for (int i = 1; counter < newSize && i < root->n_children; counter++, i++) {
 				new_generation[counter] = root->children[i];
 				root->children[i] = NULL; // so we can free the empty space once we're done 
 			}
+
 			free(root->children); // this should free the memory space pointed to by root->children
 			root->children = new_generation; // join root with its new family
-			node_finalize(goblin);	// go away, foul goblin, we have no more need of your services
+
+			root->n_children = newSize; // gotta remember to update this or else we'll have inaccessible children
+			// which would be bad for all the tiny dancers
+			// hm, I got that tiny dancer song by elton john stuck on my mind
+			// or actually just the "HOLD ME CLOSER TINY DANCERRRR"-bit
 		}
+		// we should probably finalize goblin now
+		// although I think that causes segfaults for some reason
+		node_finalize(goblin);
+		return root;
 
 
 		/*
