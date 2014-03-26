@@ -4,6 +4,7 @@ extern int outputStage; // This variable is located in vslc.c
 
 void simplify_children(Node_t* root, int depth);
 void transfer_children(Node_t* fromNode, Node_t* toNode);
+void steal_children(Node_t* target, Node_t* victim);
 
 
 // calls simplify() on all the children of root
@@ -14,6 +15,41 @@ void simplify_children(Node_t* root, int depth) {
 	}
 }
 
+// steals the children of victim and gives them to target and removes victim from target's
+void steal_children(Node_t* target, Node_t* victim) {
+	int newSize = target->n_children + victim->n_children - 1;
+	// sigh, we need to expand target->children
+	// now for some reason realloc(target->children, sizeof(node_t*) * newsize) segfaults
+	// OOH WAIT DOES IT SEGFAULT IF newsize == target->n_children? I SHOULD CHECK THAT OUT
+	// probably not gonna, though
+	node_t** new_generation; // array to holds the new number of children
+	new_generation = (node_t**) malloc(sizeof(node_t*) * newSize);
+
+	// ok so the children of victim should come first in the new generation
+	int counter = 0;
+	for (; counter < victim->n_children; counter++) {
+		new_generation[counter] = victim->children[counter];
+		victim->children[counter] = NULL; // so we can finalize victim later
+		// when we are done with it
+		// without it mucking up our AST
+	}
+	// so counter should now be equal to the last index in the new_generation
+	// which means target's non-victim children should take their place from counter+1 and upwards
+	counter++; 
+	for (int i = 1; counter < newSize && i < target->n_children; counter++, i++) {
+		new_generation[counter] = target->children[i];
+		target->children[i] = NULL; // so we can free the empty space once we're done 
+	}
+
+	free(target->children); // this should free the memory space pointed to by target->children
+	target->children = new_generation; // join target with its new family
+
+	target->n_children = newSize; // gotta remember to update this or else we'll have inaccessible children
+	// which would be bad for all the tiny dancers
+	// hm, I got that tiny dancer song by elton john stuck on my mind
+	// or actually just the "HOLD ME CLOSER TINY DANCERRRR"-bit
+
+}
 // transfers all the children of fromNode to toNode
 void transfer_children(Node_t* fromNode, Node_t* toNode) {
 	// Step 1:
@@ -125,6 +161,17 @@ Node_t *simplify_list_with_null ( Node_t *root, int depth )
 	// if the first child is NULL then we eliminate it and reduce the size of children by 1
 	// which we will do by moving the second child to the first child's place and then setting n_children to 1
 	node_t* goblin = root->children[0];
+	if (goblin == NULL) {
+		if (root->n_children > 1 && root->children[1] != NULL) {
+			root->children[0] = root->children[1];
+			root->n_children = 1;
+		}
+	} else if (root->nodetype.index == goblin->nodetype.index) {
+		// non-null goblin: >1 children
+		// we should steal goblin's children
+		steal_children(root, goblin);
+		//node_finalize(goblin); // this is going to segfault right?
+	}
 	return root;
 }
 
@@ -162,36 +209,7 @@ Node_t *simplify_list ( Node_t *root, int depth )
 			goblin->children[0] = NULL;
 
 		} else {
-			// sigh, we need to expand root->children
-			// now for some reason realloc(root->children, sizeof(node_t*) * newsize) segfaults
-			// OOH WAIT DOES IT SEGFAULT IF newsize == root->n_children? I SHOULD CHECK THAT OUT
-			// probably not gonna, though
-			node_t** new_generation; // array to holds the new number of children
-			new_generation = (node_t**) malloc(sizeof(node_t*) * newSize);
-
-			// ok so the children of goblin should come first in the new generation
-			int counter = 0;
-			for (; counter < goblin->n_children; counter++) {
-				new_generation[counter] = goblin->children[counter];
-				goblin->children[counter] = NULL; // so we can finalize goblin later
-				// when we are done with it
-				// without it mucking up our AST
-			}
-			// so counter should now be equal to the last index in the new_generation
-			// which means root's non-goblin children should take their place from counter+1 and upwards
-			counter++; 
-			for (int i = 1; counter < newSize && i < root->n_children; counter++, i++) {
-				new_generation[counter] = root->children[i];
-				root->children[i] = NULL; // so we can free the empty space once we're done 
-			}
-
-			free(root->children); // this should free the memory space pointed to by root->children
-			root->children = new_generation; // join root with its new family
-
-			root->n_children = newSize; // gotta remember to update this or else we'll have inaccessible children
-			// which would be bad for all the tiny dancers
-			// hm, I got that tiny dancer song by elton john stuck on my mind
-			// or actually just the "HOLD ME CLOSER TINY DANCERRRR"-bit
+			steal_children(root, goblin);
 		}
 		// we should probably finalize goblin now
 		// although I think that causes segfaults for some reason
