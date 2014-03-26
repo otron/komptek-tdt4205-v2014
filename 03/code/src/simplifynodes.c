@@ -50,7 +50,7 @@ void steal_children(Node_t* target, Node_t* victim) {
 	// or actually just the "HOLD ME CLOSER TINY DANCERRRR"-bit
 
 }
-// transfers all the children of fromNode to toNode
+// trnsfers all the children of fromNode to toNode
 void transfer_children(Node_t* fromNode, Node_t* toNode) {
 	// Step 1:
 	// oh cool, realloc is a thing.
@@ -107,6 +107,25 @@ Node_t *simplify_function ( Node_t *root, int depth )
 		fprintf ( stderr, "%*cSimplify %s \n", depth, ' ', root->nodetype.text );
 
 	simplify_children(root, depth);
+
+	// should move the first two children up into function
+	// steal their info, not their kids
+	node_t* type_kid = root->children[0];
+	node_t* var_kid = root->children[1];
+
+	root->data_type = type_kid->data_type; //the data_type "field" isn't a pointer so this should create a copy, right?
+	root->label = STRDUP(var_kid->label);
+	node_finalize(type_kid);
+	node_finalize(var_kid);
+
+	
+	node_t** new_gen = malloc(sizeof(node_t*) * (root->n_children - 2)); 
+	// because realloc keeps segfaulting on me and I don't want to leave memory hangin'
+
+	for (int i = 2, j = 0; i < root->n_children; i++, j++) {
+		new_gen[j] = root->children[i];
+	}
+
 	return root;
 }
 
