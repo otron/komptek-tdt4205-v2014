@@ -82,28 +82,21 @@ Node_t *simplify_types ( Node_t *root, int depth )
 
 	simplify_children(root, depth);
 
-	/*
-	// STEP 1: Check if root's base data type is CLASS_TYPE
 	if (root->data_type.base_type == CLASS_TYPE) {
-		// STEP 2: what if our assumption that root only has one child and that it's a variable-type node don't hold up?
-		if (root->n_children != 1) {
-			// well this is an error
-			// but we're not doing anything about it for now
-		}
-		// we could check if the child has a label or whatever, but wouldn't we want to trust that our parser or scanner doesn't give us a borked parse tree?
-		// That is a legit question. I don't know, y'see.
-		// STEP 3: get that variable
-		Node_t* goblin_king = root->children[0];
-		root->data_type.class_name = goblin_king->label;
-		// STEP 4: Let there be no trace of the now-forgotten child.
-		// yes I know it's the goblin_king that typically steals children I've seen Labyrinth but just run with it ok? OK.
-		goblin_king->label = NULL;
-		node_finalize(goblin_king);
-	}	
-
+		//cases we're not equipped to handle
+		if (root->n_children != 1)
+			return root;
+		if (root->children[0] == NULL)
+			return root; // ????
+		if (root->children[0]->nodetype.index != VARIABLE) 
+			return root; 
+		root->data_type.class_name = STRDUP(root->children[0]->label);
+		root->n_children = 0;
+		dealloc(root->children) // wait or is it free() I'm supposed to use here?
+		root->children = NULL;
+	}
 
 	// STEP end: YOU GET NOTHING.
-	*/
 	return root;
 }
 
