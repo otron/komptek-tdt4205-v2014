@@ -3,8 +3,9 @@
 extern int outputStage; // This variable is located in vslc.c
 
 void simplify_children(Node_t* root, int depth);
-void transfer_children(Node_t* fromNode, Node_t* toNode);
 void steal_children(Node_t* target, Node_t* victim);
+void assume_identity(Node_t* root, Node_t* changeling);
+
 
 
 // calls simplify() on all the children of root
@@ -57,22 +58,32 @@ void steal_children(Node_t* target, Node_t* victim) {
 	// or actually just the "HOLD ME CLOSER TINY DANCERRRR"-bit
 
 }
-// trnsfers all the children of fromNode to toNode
-void transfer_children(Node_t* fromNode, Node_t* toNode) {
-	// Step 1:
-	// oh cool, realloc is a thing.
-	int no_children = fromNode->n_children + toNode->n_children;
-		// it's funny how "No." is short for "numero" which means "number of"
-	toNode->children = (Node_t**) realloc(toNode->children, sizeof(node_t*) * no_children);
-	int i_start = toNode->n_children - 1;
-	for (int i = i_start, j = 0; i < no_children; i++, j++) {
-		toNode->children[i] = fromNode->children[j];
-		fromNode->children[j] = NULL;
-	}
-	fromNode->n_children = 0;
-	fromNode->children = realloc(fromNode->children, sizeof(node_t*) * fromNode->n_children);
-}
 
+// sets all of root's attributes to that of changeling
+// used to remove single children (simplify_single_children, simplify_expression)
+void assume_identity(Node_t* root, Node_t* changeling) {
+
+	root->label 			= changeling->label;
+	root->nodetype 			= changeling->nodetype;
+	root->expression_type 	= changeling->expression_type;
+	root->data_type 		= changeling->data_type;
+	root->string_index 		= changeling->string_index;
+
+	root->entry 		= changeling->entry;
+	root->class_entry	= changeling->class_entry;
+	root->function_entry = changeling->function_entry;
+	
+	root->n_children = changeling->n_children;
+
+	root->children[0] = NULL;
+	free(root->children);
+	root->children = changeling->children;
+
+	root->simplify = changeling->simplify;
+	root->bind_names = changeling->bind_names;
+	root->typecheck = changeling->typecheck;
+	root->generate = changeling->generate;
+}
 
 Node_t* simplify_default ( Node_t *root, int depth )
 {
@@ -232,29 +243,11 @@ Node_t *simplify_single_child ( Node_t *root, int depth )
 	
 	// hmm, what if I just copy all the properties of root->children[0] over to root?
 	// yeah sure why not
+	// I mean if I could somehow reference root's parent then I could just replace the reference to root with one to its first child
+	// but I don't know how, and it would break the "all of a node's children are simplified before the parent is touched"-rule/assumption
+
 	node_t* changeling = root->children[0];
-	root->label 			= changeling->label;
-	root->nodetype 			= changeling->nodetype;
-	root->expression_type 	= changeling->expression_type;
-	root->data_type 		= changeling->data_type;
-	root->string_index 		= changeling->string_index;
-
-
-	root->entry 		= changeling->entry;
-	root->class_entry	= changeling->class_entry;
-	root->function_entry = changeling->function_entry;
-	
-	root->n_children = changeling->n_children;
-
-	root->children[0] = NULL;
-	free(root->children);
-	root->children = changeling->children;
-
-	root->simplify = changeling->simplify;
-	root->bind_names = changeling->bind_names;
-	root->typecheck = changeling->typecheck;
-	root->generate = changeling->generate;
-
+	assume_identity(root, changeling);
 	return root;
 	
 }
@@ -408,6 +401,24 @@ Node_t *simplify_expression ( Node_t *root, int depth )
 		fprintf ( stderr, "%*cSimplify %s (%s) \n", depth, ' ', root->nodetype.text, root->expression_type.text );
 		
 	simplify_children(root, depth);
+	
+	//all right what do I do here I wonder
+	// I'm dealing with EXPRESSION nodes
+	// and I should do the copy thing if the node only has one child
+	// and if it's not a new_e, uminus_e or not_e
+
+	// return if it's not a single child node
+	if (root->n_children != 1)
+		return root;
+
+	// return if the expression type is new_e, uminus_e or not_e
+	if (root->expression_type.index == NEW_E ||
+			root->expression_type.index == UMINUS_E ||
+			root->expression_type.index == NOT_E)
+		return root;
+	
+	assume_identity(root, root->children[0]);
+
 	return root;
 }
 
