@@ -92,7 +92,7 @@ Node_t *simplify_types ( Node_t *root, int depth )
 			return root; 
 		root->data_type.class_name = STRDUP(root->children[0]->label);
 		root->n_children = 0;
-		dealloc(root->children) // wait or is it free() I'm supposed to use here?
+		free(root->children); // wait or is it free() I'm supposed to use here?
 		root->children = NULL;
 	}
 
@@ -115,8 +115,8 @@ Node_t *simplify_function ( Node_t *root, int depth )
 
 	root->data_type = type_kid->data_type; //the data_type "field" isn't a pointer so this should create a copy, right?
 	root->label = STRDUP(var_kid->label);
-	node_finalize(type_kid);
-	node_finalize(var_kid);
+	//node_finalize(type_kid);
+	//node_finalize(var_kid);
 
 	
 	node_t** new_gen = malloc(sizeof(node_t*) * (root->n_children - 2)); 
@@ -225,7 +225,7 @@ Node_t *simplify_list ( Node_t *root, int depth )
 		}
 		// we should probably finalize goblin now
 		// although I think that causes segfaults for some reason
-		node_finalize(goblin);
+		//node_finalize(goblin);
 		return root;
 
 
