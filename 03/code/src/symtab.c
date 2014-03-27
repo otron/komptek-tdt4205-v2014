@@ -10,6 +10,13 @@ static int strings_size = 16, //this is the number of strings the array can fit,
 		   strings_index = -1; //number of strings in the array. Wait, what? I think you mean "number of strings in the array -1"
 // oh, no you don't, you've just set it to -1 instead of 0 because of reasons, haven't you?
 // sheesh
+// haha, what the hell are you even doing
+// if strings_index is supposed to be "the number of strings in the array" (i.e. it's like the length of the array, the number of elements in it)
+// then why are you doing i<=strings_index in the s8 output-stuff?
+// because if you want to do that, then strings_index needs to be the last index of strings that contains a valid string reference
+// but that's not what you've said it should be
+// so I changed your s8 output code
+// idk why you guys do these things
 
 
 void symtab_init ( void )
@@ -19,14 +26,13 @@ void symtab_init ( void )
 	// and then free the old strings
 	// and then set new_strings to strings
 
-	strings_size *= 2; //double the space!
-	char** new_strings = (char**) malloc(sizeof(char*) * strings_size);
-	for (int i = 0; i < strings_index; i++) {
-		new_strings[i] = strings[i];
-		strings[i] = NULL;
-	}
-	free(strings);
-	strings = new_strings;
+	// hmm no I'll just have this do the init and then string_add could deal with the expansion, ok?
+	// ok
+	// also this has everything to do with me fudging it up and getting weird errors because I realized I have to set strings_index to 0 at some point
+
+	strings_index = 0;
+	strings = (char**) malloc(sizeof(char*) * strings_size);
+
 
 	return 0;
 }
@@ -54,7 +60,17 @@ int strings_add ( char *str )
         fprintf ( stderr, "Add strings (%s), index: %d \n", str, strings_index );
 
 	if (strings_index == strings_size) {
-		symtab_init(); //increase the size of the array
+		strings_size *= 2; // double the size! Twice the fun!
+		//strings = (char**) realloc(strings, sizeof(char*) * strings_size);
+		
+		char** new_strings = (char**) malloc(sizeof(char*) * strings_size);
+		for (int i = 0; i < strings_index; i++) {
+			new_strings[i] = strings[i];
+			strings[i] = NULL;
+		}
+		free(strings);
+		strings = new_strings;
+		
 	}
 
 	// add str to the array
@@ -82,7 +98,7 @@ void strings_output ( FILE *stream )
 			".NEWLINE: .ascii \"\\n \\000\"\n",
 		    stream
 		);
-		for ( int i=0; i<=strings_index; i++ ) {
+		for ( int i=0; i<strings_index; i++ ) {
 		    fprintf ( stream, ".STRING%d: .ascii %s\n", i, strings[i] );
 		    fprintf ( stream, ".ascii \"\\000\"\n", i, strings[i] ); // ugly hack
 		}
@@ -97,7 +113,7 @@ void strings_output ( FILE *stream )
 			".NEWLINE: .string \"\\n \"\n",
 		    stream
 		);
-		for ( int i=0; i<=strings_index; i++ )
+		for ( int i=0; i<strings_index; i++ )
 		    fprintf ( stream, ".STRING%d: .string %s\n", i, strings[i] );
 		fputs ( ".globl main\n", stream );
     }
