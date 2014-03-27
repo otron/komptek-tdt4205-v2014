@@ -33,6 +33,7 @@ void steal_children(Node_t* target, Node_t* victim) {
 		// when we are done with it
 		// without it mucking up our AST
 	}
+	//free(victim->children);
 	// so counter should now be equal to the last index in the new_generation
 	// which means target's non-victim children should take their place from counter+1 and upwards
 	counter++; 
@@ -233,16 +234,49 @@ Node_t *simplify_list_with_null ( Node_t *root, int depth )
 	// but that doesn't really matter at this point:
 	// if the first child is NULL then we eliminate it and reduce the size of children by 1
 	// which we will do by moving the second child to the first child's place and then setting n_children to 1
+	// haha no we're doing the malloc thing
 	node_t* goblin = root->children[0];
 	if (goblin == NULL) {
 		if (root->n_children > 1 && root->children[1] != NULL) {
-			root->children[0] = root->children[1];
+			goblin = root->children[1]; // why create a new variable when we've got one we're not using?
+			// free the children
+			root->children[1] = NULL; // first child is already null
+			free(root->children);
+			// malloc space for the remaining child
+			root->children = (node_t**) malloc(sizeof(node_t*));
+			root->children[0] = goblin;
 			root->n_children = 1;
 		}
+		return root;
 	} else if (root->nodetype.index == goblin->nodetype.index) {
 		// non-null goblin: >1 children
 		// we should steal goblin's children
-		steal_children(root, goblin);
+		//steal_children(root, goblin);
+
+		// step 1: calculate new number of children
+		int new_n_kids = root->n_children + goblin->n_children - 1;
+		// step 2: malloc a new node_t** pointer
+		node_t** new_gen = (node_t**) malloc(sizeof(node_t*) * new_n_kids);
+
+		// step 3: place goblin's children in new_gen
+		int counter = 0; // used to store goblin->n_children/first unused index of new_gen
+		for (int i = 0; i < goblin->n_children; i++, counter++) {
+			new_gen[i] = goblin->children[i];
+			goblin->children[i] = NULL;
+		}
+		// empty goblin
+		goblin->n_children = 0;
+		free(goblin->children);
+		root->children[0] = NULL;
+
+		// move the children of into new_gen
+		for (int i = 1; i < root->n_children; i++, counter++) {
+			new_gen[counter] = root->children[i];
+			root->children[i] = NULL;
+		}
+		free(root->children);
+		root->children = new_gen;
+		
 		//node_finalize(goblin); // this is going to segfault right?
 	}
 	return root;
