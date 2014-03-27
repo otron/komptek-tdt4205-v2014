@@ -224,6 +224,37 @@ Node_t *simplify_single_child ( Node_t *root, int depth )
 		fprintf ( stderr, "%*cSimplify %s \n", depth, ' ', root->nodetype.text );
 	
 	simplify_children(root, depth);
+
+	// hmm, what kind of nodes get assigned this, I wonder?
+	// STATEMENT, PARAMETER_LIST and ARGUMENT_LIST 
+	// (I looked in assignfunctions.c)
+	// now what's the differenceeee, I wonder
+	
+	// hmm, what if I just copy all the properties of root->children[0] over to root?
+	// yeah sure why not
+	node_t* changeling = root->children[0];
+	root->label 			= changeling->label;
+	root->nodetype 			= changeling->nodetype;
+	root->expression_type 	= changeling->expression_type;
+	root->data_type 		= changeling->data_type;
+	root->string_index 		= changeling->string_index;
+
+
+	root->entry 		= changeling->entry;
+	root->class_entry	= changeling->class_entry;
+	root->function_entry = changeling->function_entry;
+	
+	root->n_children = changeling->n_children;
+
+	root->children[0] = NULL;
+	free(root->children);
+	root->children = changeling->children;
+
+	root->simplify = changeling->simplify;
+	root->bind_names = changeling->bind_names;
+	root->typecheck = changeling->typecheck;
+	root->generate = changeling->generate;
+
 	return root;
 	
 }
