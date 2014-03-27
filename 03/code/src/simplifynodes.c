@@ -148,6 +148,32 @@ Node_t *simplify_class( Node_t *root, int depth )
 		fprintf ( stderr, "%*cSimplify %s \n", depth, ' ', root->nodetype.text );
 
 	simplify_children(root, depth);
+
+	// For class nodes, the label of the variable node can be moved up into the class node
+
+	// the variable node is the first child of the class node
+	// according to the grammar, anyway
+
+	// steal that label
+	root->label = STRDUP(root->children[0]->label);
+
+	// create secondary pointer to the first child
+	node_t* holdit = root->children[0];
+	// dno why, though. Felt like it might come in handy?
+	root->children[0] = NULL;
+
+	// move all children one space up
+	// malloc etc etc
+	node_t** new_gen = (node_t**) malloc(sizeof(node_t*) * (root->n_children - 1));
+	for (int i = 0, j = 1; j < root->n_children; i++, j++) {
+		new_gen[i] = root->children[j];
+		root->children[j] = NULL;
+	}
+	root->n_children -= 1; //reduce number of children by 1
+	free(root->children);
+	root->children = new_gen;
+
+
 	return root;
 }
 
