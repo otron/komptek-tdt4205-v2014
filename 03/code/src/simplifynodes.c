@@ -352,66 +352,7 @@ Node_t *simplify_list ( Node_t *root, int depth )
 		//node_finalize(goblin);
 		return root;
 
-
-		/*
-		// need to expand the children array of root to (root->n_children + child->n_children - 1)
-		int newsize = root->n_children + child->n_children - 1;
-		if (newsize == 0)
-			return root;
-
-		node_t** oldChildren = root->children;
-		root->children = (node_t**) malloc(sizeof(node_t*) * newsize); // no segfaults
-
-		
-		for (int i = 0; i < root->n_children - 1; i++) {
-			root->children[i] = oldChildren[i+1];
-			oldChildren[i] = NULL;
-		}
-		oldChildren[0] = NULL;
-		// no segfaults
-		free(oldChildren); // free the space we made for all those node_t* pointers
-		// no segfaults
-		// place the children of child in root->children
-		for (int i = root->n_children - 1, j = 0; j < child->n_children; i++, j++) {
-			root->children[i] = child->children[j];
-			child->children[j] = NULL;
-		}
-		// no segfaults
-		*/
-
-
 	}
-	/*
-	// STEP 2: compare root's type to the type of its left child
-	// the fuck.
-	// (we are assuming that there'll only ever be another list of the same type in the left child
-	if (root->children == NULL)
-		return root;
-	if (root->children[0] == NULL)
-		return root;
-	if (root->children[1] == NULL)
-		return root;
-
-	if (root->children[0]->nodetype.index == root->nodetype.index) {
-		// wiat ok I got it let's swap the right and left child
-		// STEP 3: Swap root's left (human) and right child
-		Node_t* human = root->children[0];
-		root->children[0] = root->children[1];
-		root->children[1] = NULL;
-		// STEP 4: realloc root->children to fit the children of the human 
-		root->n_children = root->n_children - 1 + human->n_children;
-		// (we have to fit the children of human and the children of root minus human.
-		root->children = realloc(root->children, (root->n_children));
-		// STEP 5: steal those kids
-		int kid_offset = 1;
-		for (int i = 0; i < root->n_children; i++) {
-			root->children[i+kid_offset] = human->children[i];
-			human->children[i] = NULL;
-		}
-		node_finalize(human);
-	}
-	*/
-	// STEP N: return NULL because the recitations slides said that was cool.
 	return root;
 }
 
