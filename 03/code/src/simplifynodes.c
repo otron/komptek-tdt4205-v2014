@@ -115,15 +115,21 @@ Node_t *simplify_function ( Node_t *root, int depth )
 
 	root->data_type = type_kid->data_type; //the data_type "field" isn't a pointer so this should create a copy, right?
 	root->label = STRDUP(var_kid->label);
+	// sheesh, why does finalizing the nodes cause segfaults?
+	// Since I don't understand where they would get referenced from
+	// i am assuming it's node_finalize's fault
+	// but the code works fine without finalizing them so hey, what's the problem anyway
+	// nothing really, just a mild annoyance.
+	// like how realloc() keeps segfaulting
 	//node_finalize(type_kid);
 	//node_finalize(var_kid);
 
 	
+	root->children[0] = NULL;
+	root->children[1] = NULL;
 	node_t** new_gen = malloc(sizeof(node_t*) * (root->n_children - 2)); 
 	// because realloc keeps segfaulting on me and I don't want to leave memory hangin'
 
-	root->children[0] = NULL;
-	root->children[1] = NULL;
 	for (int i = 2, j = 0; i < root->n_children; i++, j++) {
 		new_gen[j] = root->children[i];
 		root->children[i] = NULL;
@@ -152,6 +158,29 @@ Node_t *simplify_declaration_statement ( Node_t *root, int depth )
 		fprintf ( stderr, "%*cSimplify %s \n", depth, ' ', root->nodetype.text );
 
 	simplify_children(root, depth);
+	// declaration statements only ever have two children
+	// at least according to the grammar
+	if (root->children == NULL) 
+		return root; // ????
+	if (root->n_children != 2)
+		return root; // ????
+
+	// save those references
+	node_t* type_child = root->children[0];
+	node_t* var_child = root->children[1];
+
+	// steal that data
+	root->data_type = type_child->data_type;
+	root->label = STRDUP(var_child->label);
+	
+	root->children[0] = NULL;
+	root->children[1] = NULL;
+	root->n_children = 0;
+	free(root->children);
+
+	// sigh, node_finalize segfaults
+	// we're gonna have memory leaks aren't we?
+
 	return root;
 }
 
