@@ -57,9 +57,10 @@ int strings_add ( char *str )
 		symtab_init(); //increase the size of the array
 	}
 
+	// add str to the array
 	strings[strings_index] = str;
-	strings_index++;
-	return (strings_index - 1);
+	strings_index++; 
+	return (strings_index - 1); //return the index of the string we just put into the array
 }
 
 // Prints the data segment of the assembly code
