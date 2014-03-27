@@ -15,7 +15,8 @@ void simplify_children(Node_t* root, int depth) {
 	}
 }
 
-// steals the children of victim and gives them to target and removes victim from target's
+// steals the children of victim and gives them to target and removes victim from target's children
+// only really works for simplify_list and simplify_list_with_null
 void steal_children(Node_t* target, Node_t* victim) {
 	int newSize = target->n_children + victim->n_children - 1;
 	// sigh, we need to expand target->children
@@ -27,16 +28,21 @@ void steal_children(Node_t* target, Node_t* victim) {
 
 	// ok so the children of victim should come first in the new generation
 	int counter = 0;
-	for (; counter < victim->n_children; counter++) {
-		new_generation[counter] = victim->children[counter];
-		victim->children[counter] = NULL; // so we can finalize victim later
+	for (int i = 0; i < victim->n_children; i++, counter++) {
+		new_generation[i] = victim->children[i];
+		victim->children[i] = NULL; // so we can finalize victim later
 		// when we are done with it
 		// without it mucking up our AST
 	}
-	//free(victim->children);
-	// so counter should now be equal to the last index in the new_generation
-	// which means target's non-victim children should take their place from counter+1 and upwards
-	counter++; 
+	
+	// empty the victim
+	victim->n_children = 0;
+	free(victim->children);
+	target->children[0] = NULL; //gotta delete that reference as well
+	// yeah this is really magic, but this function is just here to save space
+	// as we do the exact same thing in simplify_list and simplify_list_with_null
+
+	// so counter should now be equal to the first unused index in new_generation
 	for (int i = 1; counter < newSize && i < target->n_children; counter++, i++) {
 		new_generation[counter] = target->children[i];
 		target->children[i] = NULL; // so we can free the empty space once we're done 
@@ -251,32 +257,9 @@ Node_t *simplify_list_with_null ( Node_t *root, int depth )
 	} else if (root->nodetype.index == goblin->nodetype.index) {
 		// non-null goblin: >1 children
 		// we should steal goblin's children
-		//steal_children(root, goblin);
+		// the procedure's the same as for simplify_list
+		steal_children(root, goblin);
 
-		// step 1: calculate new number of children
-		int new_n_kids = root->n_children + goblin->n_children - 1;
-		// step 2: malloc a new node_t** pointer
-		node_t** new_gen = (node_t**) malloc(sizeof(node_t*) * new_n_kids);
-
-		// step 3: place goblin's children in new_gen
-		int counter = 0; // used to store goblin->n_children/first unused index of new_gen
-		for (int i = 0; i < goblin->n_children; i++, counter++) {
-			new_gen[i] = goblin->children[i];
-			goblin->children[i] = NULL;
-		}
-		// empty goblin
-		goblin->n_children = 0;
-		free(goblin->children);
-		root->children[0] = NULL;
-
-		// move the children of into new_gen
-		for (int i = 1; i < root->n_children; i++, counter++) {
-			new_gen[counter] = root->children[i];
-			root->children[i] = NULL;
-		}
-		free(root->children);
-		root->children = new_gen;
-		
 		//node_finalize(goblin); // this is going to segfault right?
 	}
 	return root;
