@@ -122,9 +122,15 @@ Node_t *simplify_function ( Node_t *root, int depth )
 	node_t** new_gen = malloc(sizeof(node_t*) * (root->n_children - 2)); 
 	// because realloc keeps segfaulting on me and I don't want to leave memory hangin'
 
+	root->children[0] = NULL;
+	root->children[1] = NULL;
 	for (int i = 2, j = 0; i < root->n_children; i++, j++) {
 		new_gen[j] = root->children[i];
+		root->children[i] = NULL;
 	}
+	free(root->children); 
+	root->children = new_gen;
+	root->n_children = root->n_children - 2; // we lost two children today.
 
 	return root;
 }
