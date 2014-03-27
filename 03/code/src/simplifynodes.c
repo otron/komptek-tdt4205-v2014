@@ -83,6 +83,28 @@ void assume_identity(Node_t* root, Node_t* changeling) {
 	root->bind_names = changeling->bind_names;
 	root->typecheck = changeling->typecheck;
 	root->generate = changeling->generate;
+
+	switch (root->data_type.base_type) {
+		case INT_TYPE:
+			root->int_const = changeling->int_const;
+			break;
+			break;
+		case FLOAT_TYPE:
+			root->float_const = changeling->float_const;
+			break;
+		case BOOL_TYPE:
+			root->bool_const = changeling->bool_const;
+			break;
+		case STRING_TYPE:
+			root->string_const = changeling->string_const;
+			break;
+		case DOUBLE_TYPE:
+			root->double_const = changeling->double_const;
+			break;
+			// float, int, char, string, bool, double
+		default:
+			break;
+	}
 }
 
 Node_t* simplify_default ( Node_t *root, int depth )
