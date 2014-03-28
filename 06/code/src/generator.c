@@ -121,21 +121,69 @@ void gen_PROGRAM ( node_t *root, int scopedepth)
 
 void gen_CLASS (node_t *root, int scopedepth)
 {
+	// "generate code for methods, should be treated just like functions"
+
+	// generate the label
+	// root->class_entry == class ST entry
+	//function_symbol_t* fst = class_get_method(root->label, 
+	currentClass = root->label;
+
 
 }
 
-void gen_FUNCTION ( node_t *root, int scopedepth )
-{
+void gen_FUNCTION ( node_t *root, int scopedepth ) {
+	
+	// "Change the label generation to use different kinds of labels for methods and functions"
     // Generating label. This may need to be changed to handle labels for methods
-    function_symbol_t* entry = root->function_entry;
-	int len = strlen(entry->label);
-	char *temp = (char*) malloc(sizeof(char) * (len + 3));
-	temp[0] = 0;
-	strcat(temp, "_");
-	strcat(temp, entry->label);
-	strcat(temp, ":");
 
-	instruction_add(STRING, STRDUP(temp), NULL, 0, 0);
+	// How can we tell if root is a function or method declaration?
+	// I guess that's the challenge here.
+	// but hey, it turns out that all function declarations have a scopedepth of 1
+	// and all method declarations have a scopedepth of 3
+	// FUNCTION_LIST 0 > FUNCTION 1
+	// CLASS_LIST 0 > CLASS 1 > FUNCTION_LIST 2 > FUNCTION 3
+	// I figured this out by looking at the output from s5 and s7
+
+	int func_SD = 1; //function scopedepth
+	int meth_SD = 3; //method scopedepth
+
+	if (scopedepth == func_SD) { //function labeling
+		function_symbol_t* entry = root->function_entry;
+		int len = strlen(entry->label);
+		char *temp = (char*) malloc(sizeof(char) * (len + 3));
+		temp[0] = 0;
+		strcat(temp, "_");
+		strcat(temp, entry->label);
+		strcat(temp, ":");
+
+		instruction_add(STRING, STRDUP(temp), NULL, 0, 0);
+	}
+
+	if (scopedepth == meth_SD) {
+		// hurr, durr
+		// it would be super easy if we could somehow figure out
+		// the class the method belongs to
+		// because then we could use the labeling scheme
+		// _CLASS_METH:
+		// hmm, I guess we could do this with a static char*
+		// that gets set in gen_CLASS
+		//  haha: static char* currentClass already exists!
+		function_symbol_t* entry = root->function_entry;
+		// length of label = len(funcName) + len(className) + 4
+		// +4 because functions use +3 and we need an extra underscore here
+		int len = strlen(entry->label) + strlen(currentClass); 
+		len += 4;
+		char* temp = (char*) malloc(sizeof(char) * (len));
+		temp[0] = 0; // why do we do this? is it so that strcat() will work?
+		strcat(temp, "_");
+		strcat(temp, currentClass);
+		strcat(temp, "_");
+		strcat(temp, entry->label);
+		strcat(temp, ":");
+
+		instruction_add(STRING, STRDUP(temp), NULL, 0, 0);
+
+	}
 
     gf(root,scopedepth);
 }
@@ -220,6 +268,13 @@ void gen_PRINT_STATEMENT(node_t* root, int scopedepth)
 void gen_EXPRESSION ( node_t *root, int scopedepth )
 {
 	/*
+	   CLASS_FIELD_E 	-- find address of part before '.', add offset from part after
+	   THIS_E 			-- like a variable with offset 8
+	   NEW_E 			-- call malloc
+	   METH_CALL_E 		-- like function call with extra argument (THIS)
+	   Arithmetic, comparison, logical expressions
+	 */
+	/*
 	 * Expressions:
 	 * Handle any nested expressions first, then deal with the
 	 * top of the stack according to the kind of expression
@@ -279,12 +334,14 @@ void gen_RETURN_STATEMENT ( node_t *root, int scopedepth )
 
 void gen_WHILE_STATEMENT ( node_t *root, int scopedepth )
 {
+	// generate labels, jumps and code
 
 }
 
 
 void gen_IF_STATEMENT ( node_t *root, int scopedepth )
 {
+	// generate labels, jumps and code
 
 }
 
