@@ -127,6 +127,11 @@ void gen_CLASS (node_t *root, int scopedepth)
 	// root->class_entry == class ST entry
 	//function_symbol_t* fst = class_get_method(root->label, 
 	currentClass = root->label;
+	for (int i = 0; i < root->n_children; i++) {
+		if (root->children[0] != NULL) {
+			root->children[0]->generate(root->children[0], scopedepth+1);
+		}
+	}
 
 
 }
@@ -287,8 +292,24 @@ void gen_EXPRESSION ( node_t *root, int scopedepth )
 	case FUNC_CALL_E:
 		ge(root,scopedepth);
 		break;
-
-    /* Add cases for other expressions here */
+	case METH_CALL_E:
+		// like a function call but with an extra argument (THIS)
+		break;
+	case CLASS_FIELD_E:
+		// find address of part before '.', add offset from part after
+		break;
+	case THIS_E:
+		// like a variable, but with offset 8
+		break;
+	case NEW_E:
+		// call malloc
+		break;
+	
+	//arithmetic?
+	// comparison
+	// logical expressions
+	default:
+		break;
 	}
 
 	tracePrint ( "Ending EXPRESSION of type %s\n", (char*) root->expression_type.text);
