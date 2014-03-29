@@ -11,7 +11,7 @@ int peephole = 0;
 /* stuff I felt like including */
 void do_int_arith(node_t* root, int scopedepth);
 void do_int_cmp(node_t* root, int scopedepth);
-void do_binary_int_expr(node_t* root, int scopedepth);
+void do_binary_general_expressions(node_t* root, int scopedepth);
 
 /* Start and last element for emitting/appending instructions */
 static instruction_t *start = NULL, *last = NULL;
@@ -301,23 +301,49 @@ void gen_EXPRESSION ( node_t *root, int scopedepth )
 			// like a function call but with an extra argument (THIS)
 			// remember it's a function CALL, not a declaration
 			// so don't try calling gen_FUNCTION() here
+			//%TODO: finish case for method calls
 			break;
 		case CLASS_FIELD_E:
 			// find address of part before '.', add offset from part after
+			// "we compute an address and then load the value from that address and push it into the stack)"
+
+			// step 1: evaluate the part before the . to get the base address
+			root->children[0]->generate(root->children[0], scopedepth);
+			// I think this should work on nested class fields as well (e.g. class1.class2.field)
+			// base address is now on top of the stack
+
+			//step 2: find the offset of the second child
+			// what
+			// oh, do I look up the label of the second child in the class' symbol table and get its offset from there?
+			// that makes sense
+			char* className = root->children[0]->label;
+			char* fieldName = root->children[1]->label;
+			int second_offset = class_get_symbol(className, fieldName)->stack_offset;
+
+			//step 3: load the value at address = base (child 0) + offset (child 1)
+			// load the base address
+			instruction_add(POP, r1, NULL, 0, 0);
+			instruction_add(LOAD, r0, r1, 0, second_offset); // should load the field's value into r0
+
+			//step 4: push it onto the stack
+			instruction_add(PUSH, r0, NULL, 0, 0);
+
 			break;
 		case THIS_E:
 			// like a variable, but with offset 8
 			// I was like, "shouldn't the type of this be a class?"
 			// but then I realized I have no idea what I am doing
 			// oh, just load fp+8 and then push it to the stack, yeah?
-			instruction_add(LOAD, r0, fp, 0, 8);
+			instruction_add(LOAD, r0, fp, 0, 8); // 8 is stack offset of "THIS"
 			instruction_add(PUSH, r0, NULL, 0, 0);
 			break;
 		case NEW_E:
 			// call _malloc
 			// what
 			// I can't find any definition of _malloc anywhere in this project
+			//%TODO: NEW expressions
 			break;
+
 		default:
 			// expression is type specific or whatever
 			// I found these in generator.h, isn't that cool?
@@ -413,14 +439,14 @@ void gen_int_expression(node_t* root, int scopedepth) {
 
 void do_int_cmp(node_t* root, int scopedepth) {
 	// result gets stored in the status register
-	do_binary_int_expr(root, scopedepth);
+	do_binary_general_expressions(root, scopedepth);
 	instruction_add(CMP, r1, r2, 0, 0); // compare r1 and r2
 }
 
 // calls generate on the first two children of root
 // (root is assumed to be a binary integer expression node)
 // and pushes its childrens' result values into r2 (RHS) and r1 (LHS)
-void do_binary_int_expr(node_t* root, int scopedepth) {
+void do_binary_general_expressions(node_t* root, int scopedepth) {
 	root->children[0]->generate(root->children[0], scopedepth+1);
 	root->children[1]->generate(root->children[1], scopedepth+1);
 	instruction_add(POP, r2, NULL, 0, 0); // right operand in r2
@@ -436,7 +462,7 @@ void do_int_arith(node_t* root, int scopedepth) {
 	// something like "oh and by the way you should probably
 	// have a look through the source code because most of it
 	// isn't covered anywhere." That would be nice.
-	do_binary_int_expr(root, scopedepth);
+	do_binary_general_expressions(root, scopedepth);
 	opcode_t oppy;
 	switch (root->expression_type.index) {
 		case ADD_E:
@@ -486,6 +512,7 @@ void gen_ASSIGNMENT_STATEMENT ( node_t *root, int scopedepth )
 
     // Left hand side may be a class field, which should be handled in this assignment
 	if(root->children[0]->expression_type.index == CLASS_FIELD_E){
+		//%TODO: write code that handles assignments of class fields
 
 	}
 	// or a variable, handled in previous assignment
@@ -505,6 +532,7 @@ void gen_RETURN_STATEMENT ( node_t *root, int scopedepth )
 void gen_WHILE_STATEMENT ( node_t *root, int scopedepth )
 {
 	// generate labels, jumps and code
+	//%TODO: while statements
 
 }
 
@@ -512,6 +540,7 @@ void gen_WHILE_STATEMENT ( node_t *root, int scopedepth )
 void gen_IF_STATEMENT ( node_t *root, int scopedepth )
 {
 	// generate labels, jumps and code
+	//%TODO: IF Statements
 
 }
 
