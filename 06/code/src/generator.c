@@ -305,6 +305,16 @@ void gen_EXPRESSION ( node_t *root, int scopedepth )
 			break;
 		case STRING_TYPE:
 			gen_string_expression(root, scopedepth);
+			break;
+		default: ;
+			// I guess this is some kind of debug-code
+			// that would let me know if there's other types
+			// of expressions than the ones covered by these cases
+			int tisize = strlen("#FORGOT: ") + 1;
+			tisize += strlen(root->expression_type.text);
+			char* tits = (char*) malloc(sizeof(char) * tisize);
+			instruction_add(STRING, STRDUP(tits), NULL, 0, 0);
+			break;
 	}
 
 	tracePrint ( "Ending EXPRESSION of type %s\n", (char*) root->expression_type.text);
@@ -334,9 +344,14 @@ void gen_int_expression(node_t* root, int scopedepth) {
 			// like a variable, but with offset 8
 			// I was like, "shouldn't the type of this be a class?"
 			// but then I realized I have no idea what I am doing
+			// oh, just load fp+8 and then push it to the stack, yeah?
+			instruction_add(LOAD, r0, fp, 0, 8);
+			instruction_add(PUSH, r0, NULL, 0, 0);
 			break;
 		case NEW_E:
-			// call malloc
+			// call _malloc
+			// what
+			// I can't find any definition of _malloc anywhere in this project
 			break;
 
 			// Arithmetics!
@@ -353,6 +368,11 @@ void gen_int_expression(node_t* root, int scopedepth) {
 			instruction_add(POP, r0, NULL, 0, 0);
 			instruction_add(NEG, r0, r0, 0, 0);
 			//NEG is like the arithmetic negation, right?
+			// otherwise I'd have to do
+			// MOV r1 #0 # load 0 into r1
+			// SUB r0 r1 r0 # r0 = r1 - r0 == 0 - r0
+			// 0 - A = -A
+			// 0 - (-A) = -(-A) = A
 			instruction_add(PUSH, r0, NULL, 0, 0);
 			break;
 
