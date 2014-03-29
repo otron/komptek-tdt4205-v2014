@@ -11,7 +11,7 @@ int peephole = 0;
 /* stuff I felt like including */
 void do_int_arith(node_t* root, int scopedepth);
 void do_int_cmp(node_t* root, int scopedepth);
-void do_binary_int_exp(node_t* root, int scopedepth);
+void do_binary_int_expr(node_t* root, int scopedepth);
 
 /* Start and last element for emitting/appending instructions */
 static instruction_t *start = NULL, *last = NULL;
@@ -292,42 +292,7 @@ void gen_EXPRESSION ( node_t *root, int scopedepth )
 	tracePrint ( "Starting EXPRESSION of type %s\n", (char*) root->expression_type.text);
 
 
-	// I found these in generator.h, isn't that cool?
-	switch (root->data_type.base_type) {
-		case INT_TYPE:
-			gen_int_expression(root, scopedepth);
-			break;
-		case FLOAT_TYPE:
-			gen_float_expression(root, scopedepth);
-			break;
-		case BOOL_TYPE:
-			gen_bool_expression(root, scopedepth);
-			break;
-		case STRING_TYPE:
-			gen_string_expression(root, scopedepth);
-			break;
-		default: ;
-			// I guess this is some kind of debug-code
-			// that would let me know if there's other types
-			// of expressions than the ones covered by these cases
-			int tisize = strlen("#FORGOT: ") + 1;
-			tisize += strlen(root->expression_type.text);
-			char* tits = (char*) malloc(sizeof(char) * tisize);
-			instruction_add(STRING, STRDUP(tits), NULL, 0, 0);
-			break;
-	}
-
-	tracePrint ( "Ending EXPRESSION of type %s\n", (char*) root->expression_type.text);
-}
-
-void gen_int_expression(node_t* root, int scopedepth) {
-	int size = strlen("# begin INT expression, type ") + strlen(root->expression_type.text);
-	char* temp = (char*) malloc(sizeof(char) * (size + 1));
-	temp[0] = 0;
-	strcat(temp, "# begin INT expression, type ");
-	strcat(temp, STRDUP(root->expression_type.text));
-	instruction_add(STRING, STRDUP(temp), NULL, 0, 0);
-
+	// the idea is to handle expressions that don't require special treatment based on their types first
 	switch(root->expression_type.index) {
 		case FUNC_CALL_E:
 			ge(root, scopedepth);
@@ -353,16 +318,51 @@ void gen_int_expression(node_t* root, int scopedepth) {
 			// what
 			// I can't find any definition of _malloc anywhere in this project
 			break;
+		default:
+			// expression is type specific or whatever
+			// I found these in generator.h, isn't that cool?
+			switch (root->data_type.base_type) {
+				case INT_TYPE:
+					gen_int_expression(root, scopedepth);
+					break;
+				case FLOAT_TYPE:
+					gen_float_expression(root, scopedepth);
+					break;
+				case BOOL_TYPE:
+					gen_bool_expression(root, scopedepth);
+					break;
+				case STRING_TYPE:
+					gen_string_expression(root, scopedepth);
+					break;
+				default: ;
+			}
 
+			break;
+	}
+
+	tracePrint ( "Ending EXPRESSION of type %s\n", (char*) root->expression_type.text);
+}
+void gen_int_expression(node_t* root, int scopedepth) {
+	int size = strlen("# begin INT expression, type ") + strlen(root->expression_type.text);
+	char* temp = (char*) malloc(sizeof(char) * (size + 1));
+	temp[0] = 0;
+	strcat(temp, "# begin INT expression, type ");
+	strcat(temp, STRDUP(root->expression_type.text));
+	instruction_add(STRING, STRDUP(temp), NULL, 0, 0);
+
+	switch(root->expression_type.index) {
 			// Arithmetics!
 			// all of these are basically the same so I put them
 			// in their own function
+
+		// Binary arithmetic expressions!
 		case ADD_E:
 		case SUB_E:
 		case MUL_E:
 		case DIV_E:
 			do_int_arith(root, scopedepth);
 			break;
+		// unary arithmetic expressions!
 		case UMINUS_E:
 			root->children[0]->generate(root->children[0], scopedepth+1);
 			instruction_add(POP, r0, NULL, 0, 0);
@@ -376,9 +376,9 @@ void gen_int_expression(node_t* root, int scopedepth) {
 			instruction_add(PUSH, r0, NULL, 0, 0);
 			break;
 
-			// Comparison!
-			// they're all binary operations
-			// and the CMP function checks out all of them
+		// Comparison!
+		// they're all binary operations
+		// and the CMP function checks out all of them
 		case LEQUAL_E:
 		case GEQUAL_E:
 		case EQUAL_E:
@@ -398,7 +398,6 @@ void gen_int_expression(node_t* root, int scopedepth) {
 			// xor it with 111111... I guess?
 			// unary expression
 			// I am going to get back to this
-			// %TODO: implement NOT for integer expressions
 			break;
 
 		default:
@@ -414,14 +413,14 @@ void gen_int_expression(node_t* root, int scopedepth) {
 
 void do_int_cmp(node_t* root, int scopedepth) {
 	// result gets stored in the status register
-	do_binary_int_exp(root, scopedepth);
+	do_binary_int_expr(root, scopedepth);
 	instruction_add(CMP, r1, r2, 0, 0); // compare r1 and r2
 }
 
 // calls generate on the first two children of root
 // (root is assumed to be a binary integer expression node)
 // and pushes its childrens' result values into r2 (RHS) and r1 (LHS)
-void do_binary_int_exp(node_t* root, int scopedepth) {
+void do_binary_int_expr(node_t* root, int scopedepth) {
 	root->children[0]->generate(root->children[0], scopedepth+1);
 	root->children[1]->generate(root->children[1], scopedepth+1);
 	instruction_add(POP, r2, NULL, 0, 0); // right operand in r2
@@ -437,7 +436,7 @@ void do_int_arith(node_t* root, int scopedepth) {
 	// something like "oh and by the way you should probably
 	// have a look through the source code because most of it
 	// isn't covered anywhere." That would be nice.
-	do_binary_int_exp(root, scopedepth);
+	do_binary_int_expr(root, scopedepth);
 	opcode_t oppy;
 	switch (root->expression_type.index) {
 		case ADD_E:
