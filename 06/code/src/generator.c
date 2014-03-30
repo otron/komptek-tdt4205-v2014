@@ -647,6 +647,10 @@ void gen_ASSIGNMENT_STATEMENT ( node_t *root, int scopedepth )
 	if(root->children[0]->expression_type.index == CLASS_FIELD_E){
 		//%TODO: write code that handles assignments of class fields
 
+		// all we need to do is figure out the address of the class field
+		// continue the traversal on the RHS of the assignment
+		// and store the value on top of the stack into the address on the LHS
+
 	}
 	// or a variable, handled in previous assignment
 	else{
