@@ -395,9 +395,8 @@ void gen_int_expression(node_t* root, int scopedepth) {
 			break;
 		// unary arithmetic expressions!
 		case UMINUS_E:
-			root->children[0]->generate(root->children[0], scopedepth+1);
-			instruction_add(POP, r0, NULL, 0, 0);
-			instruction_add(NEG, r0, r0, 0, 0);
+			do_unary_general_expressions(root, scopedepth);
+			instruction_add(NEG, r0, lhs, 0, 0);
 			//NEG is like the arithmetic negation, right?
 			// otherwise I'd have to do
 			// MOV r1 #0 # load 0 into r1
@@ -423,8 +422,8 @@ void gen_int_expression(node_t* root, int scopedepth) {
 			// implemented as boolean logic
 			// binary expressions
 		case AND_E:
-			//%TODO: implement logic for integer expressions
 		case OR_E:
+			do_int_logic(root, scopedepth);
 			break;
 
 			// unary expression
@@ -434,6 +433,7 @@ void gen_int_expression(node_t* root, int scopedepth) {
 			// I am going to get back to this
 			//%TODO: implement logical NOT
 			do_unary_general_expressions(root, scopedepth);
+			// instructions that compute NOT lhs go here
 			break;
 
 		default:
@@ -461,8 +461,21 @@ void do_int_cmp(node_t* root, int scopedepth) {
 }
 
 void do_int_logic(node_t* root, int scopedepth) {
-	instruction_add(POP, r1, NULL, 0, 0); // LHS
-	instruction_add(POP, r2, NULL, 0, 0);
+	do_binary_general_expressions(root, scopedepth);
+
+	opcode_t operator;
+
+	switch(root->expression_type.index) {
+		case AND_E:
+			operator = MUL;
+			break;
+		case OR_E:
+			operator = ADD;
+			break;
+	}
+
+	instruction_add3(operator, r0, lhs, rhs);
+	instruction_add(PUSH, r0, NULL, 0, 0);
 }
 
 // calls generate on the first two children of root
@@ -508,13 +521,16 @@ void do_int_arith(node_t* root, int scopedepth) {
 	instruction_add(STRING, STRDUP("#buttsdone"), NULL, 0, 0);
 }
 void gen_float_expression(node_t* root, int scopedepth) {
+	// %TODO: implement floating point arithmetic
 	instruction_add(STRING, STRDUP("# begin float expression"), NULL, 0, 0);
 }
 void gen_string_expression(node_t* root, int scopedepth) {
 	instruction_add(STRING, STRDUP("# begin string expression"), NULL, 0, 0);
 }
 void gen_bool_expression(node_t* root, int scopedepth) {
-	instruction_add(STRING, STRDUP("# begin boolean expression"), NULL, 0, 0);
+	gen_int_expression(root, scopedepth);
+	// I see potential problems that might arise from handling boolean specific expressions as integers
+	//instruction_add(STRING, STRDUP("# begin boolean expression"), NULL, 0, 0);
 }
 
 void gen_VARIABLE ( node_t *root, int scopedepth )
