@@ -425,12 +425,15 @@ void gen_int_expression(node_t* root, int scopedepth) {
 		case AND_E:
 			//%TODO: implement logic for integer expressions
 		case OR_E:
+			break;
+
 			// unary expression
 		case NOT_E: //! (logical negation)
 			// xor it with 111111... I guess?
-			// unary expression
+			// can use the EOR instruction for logical exclusive OR
 			// I am going to get back to this
-			do_int_logic(root, scopedepth);
+			//%TODO: implement logical NOT
+			do_unary_general_expressions(root, scopedepth);
 			break;
 
 		default:
@@ -447,8 +450,8 @@ void gen_int_expression(node_t* root, int scopedepth) {
 // calls generate on the first (and only) child of root
 // then pops the result of that expression into lhs/r1
 void do_unary_general_expressions(node_t* root, int scopedepth) {
+	root->children[0]->generate(root->children[0], scopedepth);
 	instruction_add(POP, lhs, NULL, 0, 0);
-
 }
 
 void do_int_cmp(node_t* root, int scopedepth) {
@@ -466,8 +469,8 @@ void do_int_logic(node_t* root, int scopedepth) {
 // (root is assumed to be a binary integer expression node)
 // and pushes its childrens' result values into lhs (r1) and rhs (r2)
 void do_binary_general_expressions(node_t* root, int scopedepth) {
-	root->children[0]->generate(root->children[0], scopedepth+1);
-	root->children[1]->generate(root->children[1], scopedepth+1);
+	root->children[0]->generate(root->children[0], scopedepth);
+	root->children[1]->generate(root->children[1], scopedepth);
 	instruction_add(POP, rhs, NULL, 0, 0); // right operand in r2
 	instruction_add(POP, lhs, NULL, 0, 0); // left operand in r1
 }
