@@ -11,7 +11,12 @@ int peephole = 0;
 /* stuff I felt like including */
 void do_int_arith(node_t* root, int scopedepth);
 void do_int_cmp(node_t* root, int scopedepth);
+void do_int_logic(node_t* root, int scopedepth);
 void do_binary_general_expressions(node_t* root, int scopedepth);
+void do_unary_general_expressions(node_t* root, int scopedepth);
+
+static char *lhs = "r1",
+			*rhs = "r2";
 
 /* Start and last element for emitting/appending instructions */
 static instruction_t *start = NULL, *last = NULL;
@@ -415,15 +420,17 @@ void gen_int_expression(node_t* root, int scopedepth) {
 			break;
 
 			// Logic!
+			// implemented as boolean logic
+			// binary expressions
 		case AND_E:
 			//%TODO: implement logic for integer expressions
-			break;
 		case OR_E:
-			break;
+			// unary expression
 		case NOT_E: //! (logical negation)
 			// xor it with 111111... I guess?
 			// unary expression
 			// I am going to get back to this
+			do_int_logic(root, scopedepth);
 			break;
 
 		default:
@@ -437,20 +444,32 @@ void gen_int_expression(node_t* root, int scopedepth) {
 	}
 }
 
+// calls generate on the first (and only) child of root
+// then pops the result of that expression into lhs/r1
+void do_unary_general_expressions(node_t* root, int scopedepth) {
+	instruction_add(POP, lhs, NULL, 0, 0);
+
+}
+
 void do_int_cmp(node_t* root, int scopedepth) {
 	// result gets stored in the status register
 	do_binary_general_expressions(root, scopedepth);
 	instruction_add(CMP, r1, r2, 0, 0); // compare r1 and r2
 }
 
+void do_int_logic(node_t* root, int scopedepth) {
+	instruction_add(POP, r1, NULL, 0, 0); // LHS
+	instruction_add(POP, r2, NULL, 0, 0);
+}
+
 // calls generate on the first two children of root
 // (root is assumed to be a binary integer expression node)
-// and pushes its childrens' result values into r2 (RHS) and r1 (LHS)
+// and pushes its childrens' result values into lhs (r1) and rhs (r2)
 void do_binary_general_expressions(node_t* root, int scopedepth) {
 	root->children[0]->generate(root->children[0], scopedepth+1);
 	root->children[1]->generate(root->children[1], scopedepth+1);
-	instruction_add(POP, r2, NULL, 0, 0); // right operand in r2
-	instruction_add(POP, r1, NULL, 0, 0); // left operand in r1
+	instruction_add(POP, rhs, NULL, 0, 0); // right operand in r2
+	instruction_add(POP, lhs, NULL, 0, 0); // left operand in r1
 }
 // calls generate on the first two children of root
 // and does the integer arithmetic stuff
@@ -462,8 +481,10 @@ void do_int_arith(node_t* root, int scopedepth) {
 	// something like "oh and by the way you should probably
 	// have a look through the source code because most of it
 	// isn't covered anywhere." That would be nice.
+
 	do_binary_general_expressions(root, scopedepth);
 	opcode_t oppy;
+
 	switch (root->expression_type.index) {
 		case ADD_E:
 			oppy = ADD;
@@ -478,7 +499,8 @@ void do_int_arith(node_t* root, int scopedepth) {
 			oppy = DIV;
 			break;
 	}
-	instruction_add3(oppy, r0, r1, r2);
+
+	instruction_add3(oppy, r0, lhs, rhs);
 	instruction_add(PUSH, r0, NULL, 0, 0);
 	instruction_add(STRING, STRDUP("#buttsdone"), NULL, 0, 0);
 }
