@@ -314,13 +314,25 @@ void gen_EXPRESSION ( node_t *root, int scopedepth )
 			// I did some thinking and if we want to support infinitely-nested classes and method calls
 			// then that is fine
 			// because no matter how many times we go class.class.class.class.class.class....class.method()
-			// the only thing that matters at this point is 1) the name of the method and 2) the name of the class the method belongs to
+			// the only thing that matters is 1) the name of the method and 2) the name of the class the method belongs to
 			// and the method itself (or the variable containing its name) is always the second child of root
 			//		(the third child is the EXPRESSION_LIST with the arguments)
-			// and the class we are interested in is always the second child of the first child of root (root->children[0]->children[1])
-			char *methodName = root->children[1]->label,
-				 *class_name = root->children[0]->children[1]->label;
 
+			// the class name is either the first child of root (e.g. class.method()) OR
+			// the second child of the first child of root (e.g. class.class.method())
+			// so we have to look at the first child's type
+			
+			char *methodName, *class_name;
+
+			if (root->children[0]->nodetype.index == VARIABLE) {
+				class_name = root->children[0]->label;
+			} else if (root->children[0]->nodetype.index == EXPRESSION &&
+					root->children[0]->expression_type.index == CLASS_FIELD_E) {
+				class_name = root->children[0]->children[1]->label;
+			}
+			methodName = root->children[1]->label;
+
+			
 			int labelSize = 4 + strlen(methodName) +
 				strlen(class_name);
 			char* jmpLabel = (char*) malloc(sizeof(char) * labelSize);
@@ -345,6 +357,7 @@ void gen_EXPRESSION ( node_t *root, int scopedepth )
 			instruction_add(JUMP, STRDUP(jmpLabel), NULL, 0, 0);
 			instruction_add(STRING, STRDUP("#JUMP!"), NULL, 0, 0);
 			// the return address is the next instruction
+			free(jmpLabel);
 
 			// step 5: caller removes parameters, restores registers and uses result
 			// hmm, ok I guess
