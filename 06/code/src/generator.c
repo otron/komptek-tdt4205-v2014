@@ -215,7 +215,7 @@ void gen_PRINT_STATEMENT(node_t* root, int scopedepth)
 
 	for(int i = 0; i < root->children[0]->n_children; i++){
 
-		root->children[0]->children[i]->generate(root->children[0]->children[i], scopedepth);
+		root->children[0]->children[i]->generate(root->children[0]->children[i], scopedepth+1);
 
 		//Pushing the .INTEGER constant, which will be the second argument to printf,
 		//and cause the first argument, which is the result of the expression, and is
@@ -313,7 +313,7 @@ void gen_EXPRESSION ( node_t *root, int scopedepth )
 			// "we compute an address and then load the value from that address and push it into the stack)"
 
 			// step 1: evaluate the part before the . to get the base address
-			root->children[0]->generate(root->children[0], scopedepth);
+			root->children[0]->generate(root->children[0], scopedepth+1);
 			// I think this should work on nested class fields as well (e.g. class1.class2.field)
 			// base address is now on top of the stack
 
@@ -450,7 +450,7 @@ void gen_int_expression(node_t* root, int scopedepth) {
 // calls generate on the first (and only) child of root
 // then pops the result of that expression into lhs/r1
 void do_unary_general_expressions(node_t* root, int scopedepth) {
-	root->children[0]->generate(root->children[0], scopedepth);
+	root->children[0]->generate(root->children[0], scopedepth+1);
 	instruction_add(POP, lhs, NULL, 0, 0);
 }
 
@@ -482,8 +482,8 @@ void do_int_logic(node_t* root, int scopedepth) {
 // (root is assumed to be a binary integer expression node)
 // and pushes its childrens' result values into lhs (r1) and rhs (r2)
 void do_binary_general_expressions(node_t* root, int scopedepth) {
-	root->children[0]->generate(root->children[0], scopedepth);
-	root->children[1]->generate(root->children[1], scopedepth);
+	root->children[0]->generate(root->children[0], scopedepth+1);
+	root->children[1]->generate(root->children[1], scopedepth+1);
 	instruction_add(POP, rhs, NULL, 0, 0); // right operand in r2
 	instruction_add(POP, lhs, NULL, 0, 0); // left operand in r1
 }
@@ -549,7 +549,7 @@ void gen_ASSIGNMENT_STATEMENT ( node_t *root, int scopedepth )
 
 	//Generating the code for the expression part of the assignment. The result is
 	//placed on the top of the stack
-	root->children[1]->generate(root->children[1], scopedepth);
+	root->children[1]->generate(root->children[1], scopedepth+1);
 
     // Left hand side may be a class field, which should be handled in this assignment
 	if(root->children[0]->expression_type.index == CLASS_FIELD_E){
