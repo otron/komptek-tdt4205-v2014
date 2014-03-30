@@ -307,7 +307,6 @@ void gen_EXPRESSION ( node_t *root, int scopedepth )
 			// like a function call but with an extra argument (THIS)
 			// remember it's a function CALL, not a declaration
 			// so don't try calling gen_FUNCTION() here
-			//%TODO: finish case for method calls
 
 			// step whatever: get the label for the method
 			// this is "_CLASS_METHOD:"
@@ -585,7 +584,7 @@ void do_int_arith(node_t* root, int scopedepth) {
 	instruction_add(STRING, STRDUP("#buttsdone"), NULL, 0, 0);
 }
 void gen_float_expression(node_t* root, int scopedepth) {
-	// %TODO: implement floating point arithmetic
+	// %TODO: (OPTIONAL) implement floating point arithmetic
 	instruction_add(STRING, STRDUP("# begin float expression"), NULL, 0, 0);
 }
 void gen_string_expression(node_t* root, int scopedepth) {
