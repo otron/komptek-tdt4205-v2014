@@ -302,12 +302,63 @@ void gen_EXPRESSION ( node_t *root, int scopedepth )
 		case FUNC_CALL_E:
 			ge(root, scopedepth);
 			break;
-		case METH_CALL_E:
+
+		case METH_CALL_E: ;
 			// like a function call but with an extra argument (THIS)
 			// remember it's a function CALL, not a declaration
 			// so don't try calling gen_FUNCTION() here
 			//%TODO: finish case for method calls
+
+			// step whatever: get the label for the method
+			// this is "_CLASS_METHOD:"
+			// I did some thinking and if we want to support infinitely-nested classes and method calls
+			// then that is fine
+			// because no matter how many times we go class.class.class.class.class.class....class.method()
+			// the only thing that matters at this point is 1) the name of the method and 2) the name of the class the method belongs to
+			// and the method itself (or the variable containing its name) is always the second child of root
+			//		(the third child is the EXPRESSION_LIST with the arguments)
+			// and the class we are interested in is always the second child of the first child of root (root->children[0]->children[1])
+			char *methodName = root->children[1]->label,
+				 *class_name = root->children[0]->children[1]->label;
+
+			int labelSize = 4 + strlen(methodName) +
+				strlen(class_name);
+			char* jmpLabel = (char*) malloc(sizeof(char) * labelSize);
+			jmpLabel[0] = 0;
+			strcat(jmpLabel, "_");
+			strcat(jmpLabel, class_name);
+			strcat(jmpLabel, "_");
+			strcat(jmpLabel, methodName);
+			strcat(jmpLabel, ":");
+
+			// ok now for the rest of the steps
+			// step 1: save registers on stack
+			// there are no registers to save here as we put everything on the stack
+
+			// step 2: push parameters onto the stack
+			// i.e. call gen_default on the third child
+			gen_default(root->children[2], scopedepth); // gen_default checks if the node argument is null so it's cool
+
+			// step 3: save return address in link register
+			// this should be done automatically by the jump instruction
+			// step 4: jump to the function/method address
+			instruction_add(JUMP, STRDUP(jmpLabel), NULL, 0, 0);
+			instruction_add(STRING, STRDUP("#JUMP!"), NULL, 0, 0);
+			// the return address is the next instruction
+
+			// step 5: caller removes parameters, restores registers and uses result
+			// hmm, ok I guess
+			// result should be in r0
+			int paramCount = class_get_method(class_name, methodName);
+			for (int i = 0; i < paramCount; i++) {
+				instruction_add(POP, r1, NULL, 0, 0);
+			}
+
+			// save returned value on the stack
+			instruction_add(PUSH, r0, NULL, 0, 0);
+
 			break;
+
 		case CLASS_FIELD_E:
 			// find address of part before '.', add offset from part after
 			// "we compute an address and then load the value from that address and push it into the stack)"
