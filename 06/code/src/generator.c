@@ -15,6 +15,11 @@ void do_int_logic(node_t* root, int scopedepth);
 void do_binary_general_expressions(node_t* root, int scopedepth);
 void do_unary_general_expressions(node_t* root, int scopedepth);
 
+static char *currentFunc = NULL;
+static int conditional_counter = 0;
+
+
+
 static char *lhs = "r1",
 			*rhs = "r2";
 
@@ -171,6 +176,8 @@ void gen_FUNCTION ( node_t *root, int scopedepth ) {
 		strcat(temp, ":");
 
 		instruction_add(STRING, STRDUP(temp), NULL, 0, 0);
+		currentFunc = temp;
+		conditional_counter_outer = 0;
 	}
 
 	if (scopedepth == meth_SD) {
@@ -196,6 +203,9 @@ void gen_FUNCTION ( node_t *root, int scopedepth ) {
 		strcat(temp, ":");
 
 		instruction_add(STRING, STRDUP(temp), NULL, 0, 0);
+
+		currentFunc = temp;
+		conditional
 
 	}
 
@@ -656,6 +666,25 @@ void gen_WHILE_STATEMENT ( node_t *root, int scopedepth )
 {
 	// generate labels, jumps and code
 	//%TODO: while statements
+
+	/* proposed labeling scheme:
+	   save the label of the function/method we are currently inside
+	   	this is done by maintaining a global char* in this code that gets updated
+		every time we add a new function or method label
+		also we need a global counter that is reset when the char* is updated
+		this counter is incremented by 1 for each IF and WHILE statement we encounter
+
+		and the labels of WHILEs and IFs thus become
+		_%FUNCTION_%S_%COUNTER:
+		e.g. _main_IF_1, _main_WHILE_2 and so on
+		for methods it'd be _class_method_IF_1 and so on
+
+		as long as we store this label as a local variable before continuing the traversal
+	   	and only ever increment the counter inside each function/method
+		this should work fine
+
+	 */
+
 
 }
 
