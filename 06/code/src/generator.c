@@ -405,11 +405,30 @@ void gen_EXPRESSION ( node_t *root, int scopedepth )
 			instruction_add(LOAD, r0, fp, 0, 8); // 8 is stack offset of "THIS"
 			instruction_add(PUSH, r0, NULL, 0, 0);
 			break;
-		case NEW_E:
+
+		case NEW_E: ;
 			// call _malloc
-			// what
 			// I can't find any definition of _malloc anywhere in this project
-			//%TODO: NEW expressions
+			// well ok it seems to be in generator.h
+			// so I should do an assembly function call to the label _malloc
+			// sheesh
+			// how do I pass the size argument to _malloc?
+			// oh wait that's right, I put it on the stack
+			// nice
+
+			// step 1: get the size of the class we're instantiating
+			// I think it's on the child of root
+			int d_size = root->children[0]->class_entry->size;
+			// well this doesn't segfault so, cool I guess?
+			// step 2: push this number on the stack
+			instruction_add(MOVE, r0, NULL, d_size, 0);
+			instruction_add(PUSH, r0, NULL, 0, 0);
+
+			// step 3: call _malloc
+			instruction_add(JUMP, STRDUP("_malloc:"), NULL, 0, 0);
+
+			//step 4: ????
+
 			break;
 
 		default:
